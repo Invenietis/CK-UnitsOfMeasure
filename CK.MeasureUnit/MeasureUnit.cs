@@ -172,22 +172,22 @@ namespace CK.Core
         //    }
         //}
 
-        private protected static NormalizedMeasureUnit RegisterNormalized( BasicMeasureUnit[] units)
+        private protected static CombinedMeasureUnit RegisterCombined( ExponentMeasureUnit[] units)
         {
-            var names = NormalizedMeasureUnit.ComputeNames(units);
-            return Register(names.A, names.N, () => new NormalizedMeasureUnit(names,units), null);
+            var names = CombinedMeasureUnit.ComputeNames(units);
+            return Register(names.A, names.N, () => new CombinedMeasureUnit(names,units), null);
         }
 
-        private protected static BasicMeasureUnit RegisterBasic(int exp, FundamentalMeasureUnit u)
+        private protected static ExponentMeasureUnit RegisterExponent(int exp, AtomicMeasureUnit u)
         {
-            var names = BasicMeasureUnit.ComputeNames(exp, u);
-            return Register(names.A, names.N, () => new BasicMeasureUnit(names, exp, u), null);
+            var names = ExponentMeasureUnit.ComputeNames(exp, u);
+            return Register(names.A, names.N, () => new ExponentMeasureUnit(names, exp, u), null);
         }
 
-        static PrefixedMeasureUnit RegisterPrefix(MeasureStandardPrefix p, MeasureUnit u)
+        static internal PrefixedMeasureUnit RegisterPrefixed(ExpFactor adjustment, MeasureStandardPrefix p, AtomicMeasureUnit u)
         {
-            var names = PrefixedMeasureUnit.ComputeNames(p, u);
-            return Register(names.A, names.N, () => new PrefixedMeasureUnit(names, p, u), null);
+            var names = PrefixedMeasureUnit.ComputeNames( adjustment, p, u);
+            return Register(names.A, names.N, () => new PrefixedMeasureUnit(names, adjustment, p, u), null);
         }
 
         static FundamentalMeasureUnit RegisterFundamental(string abbreviation, string name)

@@ -82,28 +82,33 @@ namespace CK.Core.Tests
             // sievert      | Sv        | dose ionizing radiation   | J/kg      | m2⋅s−2
             // katal        | kat       | catalytic activity        | mol/s     | s−1⋅mol
 
-            var squaredMeter = MeasureUnit.Metre^2;
+            var metre = MeasureUnit.Metre;
+            var second = MeasureUnit.Second;
+            var kilogram = MeasureUnit.Kilogram;
+            var ampere = MeasureUnit.Ampere;
+            var candela = MeasureUnit.Candela;
+            var squaredMeter = metre^2;
 
-            var hertz = MeasureUnit.None / MeasureUnit.Second;
+            var hertz = MeasureUnit.None / second;
             hertz.Abbreviation.Should().Be( "s-1" );
 
-            var rad = MeasureUnit.Metre * (MeasureUnit.Metre ^ -1);
+            var rad = metre * (metre ^ -1);
             rad.Should().BeSameAs( MeasureUnit.None );
 
             var steradian = squaredMeter / squaredMeter;
             steradian.Should().BeSameAs( MeasureUnit.None );
 
-            var newton = MeasureUnit.Kilogram * MeasureUnit.Metre * (MeasureUnit.Second ^ -2);
+            var newton = kilogram * metre * (second ^ -2);
             newton.Abbreviation.Should().Be( "kg.m.s-2" );
 
             var pascal = newton / squaredMeter;
             pascal.Abbreviation.Should().Be( "kg.m-1.s-2" );
 
-            var joule = newton * MeasureUnit.Metre;
-            var watt = joule / MeasureUnit.Second;
-            var coulomb = MeasureUnit.Ampere * MeasureUnit.Second;
+            var joule = newton * metre;
+            var watt = joule / second;
+            var coulomb = ampere * second;
 
-            var volt = watt / MeasureUnit.Ampere;
+            var volt = watt / ampere;
             var volt2 = joule / coulomb;
             volt.Should().BeSameAs( volt2 );
             volt.Abbreviation.Should().Be( "m2.kg.A-1.s-3" );
@@ -111,33 +116,33 @@ namespace CK.Core.Tests
             var farad = coulomb / volt;
             farad.Abbreviation.Should().Be( "s4.A2.kg-1.m-2" );
 
-            var ohm = volt / MeasureUnit.Ampere;
+            var ohm = volt / ampere;
             ohm.Abbreviation.Should().Be( "m2.kg.A-2.s-3" );
 
-            var farad2 = MeasureUnit.Second / ohm;
+            var farad2 = second / ohm;
             farad2.Should().BeSameAs( farad );
 
             var siemens = MeasureUnit.None / ohm;
-            var siemens2 = MeasureUnit.Ampere / volt;
+            var siemens2 = ampere / volt;
             siemens.Should().BeSameAs( siemens2 );
             siemens.Abbreviation.Should().Be( "s3.A2.kg-1.m-2" );
 
-            var weber = joule / MeasureUnit.Ampere;
-            var tesla = volt * MeasureUnit.Second / squaredMeter;
+            var weber = joule / ampere;
+            var tesla = volt * second / squaredMeter;
             var tesla2 = weber / squaredMeter;
-            var tesla3 = newton / (MeasureUnit.Ampere * MeasureUnit.Metre);
+            var tesla3 = newton / (ampere * metre);
             tesla2.Should().BeSameAs( tesla );
             tesla3.Should().BeSameAs( tesla );
             tesla.Abbreviation.Should().Be( "kg.A-1.s-2" );
 
-            var henry = ohm * MeasureUnit.Second;
-            var henry2 = volt * MeasureUnit.Second / MeasureUnit.Ampere;
-            var henry3 = weber / MeasureUnit.Ampere;
+            var henry = ohm * second;
+            var henry2 = volt * second / ampere;
+            var henry3 = weber / ampere;
             henry2.Should().BeSameAs( henry );
             henry3.Should().BeSameAs( henry );
             henry.Abbreviation.Should().Be( "m2.kg.A-2.s-2" );
 
-            var lumen = MeasureUnit.Candela * steradian;
+            var lumen = candela * steradian;
             var lux = lumen / squaredMeter;
             lux.Abbreviation.Should().Be( "cd.m-2" );
 

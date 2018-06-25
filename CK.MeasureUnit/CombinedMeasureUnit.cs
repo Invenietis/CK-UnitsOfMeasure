@@ -8,60 +8,60 @@ using System.Diagnostics;
 namespace CK.Core
 {
     /// <summary>
-    /// Normalized measure unit describes any normalized combination of one or more <see cref="BasicMeasureUnit"/>.
+    /// Combined measure unit: any combination of one or more <see cref="ExponentMeasureUnit"/>.
     /// </summary>
-    public class NormalizedMeasureUnit : MeasureUnit
+    public class CombinedMeasureUnit : MeasureUnit
     {
-        readonly BasicMeasureUnit[] _units;
-        NormalizedMeasureUnit _invert;
+        readonly ExponentMeasureUnit[] _units;
+        CombinedMeasureUnit _invert;
 
-        internal NormalizedMeasureUnit( (string A, string N) names, BasicMeasureUnit[] units )
+        internal CombinedMeasureUnit( (string A, string N) names, ExponentMeasureUnit[] units )
             : base( names.A, names.N )
         {
             _units = units;
         }
 
-        private protected NormalizedMeasureUnit( string abbreviation, string name )
+        private protected CombinedMeasureUnit( string abbreviation, string name )
             : base( abbreviation, name )
         {
-            _units = new[] { (BasicMeasureUnit)this };
+            _units = new[] { (ExponentMeasureUnit)this };
         }
 
         /// <summary>
-        /// Gets the <see cref="BasicMeasureUnit"/> that define this normalized measure.
+        /// Gets the <see cref="ExponentMeasureUnit"/> that define this normalized measure.
         /// </summary>
-        public IReadOnlyList<BasicMeasureUnit> MeasureUnits => _units;
+        public IReadOnlyList<ExponentMeasureUnit> MeasureUnits => _units;
 
         /// <summary>
         /// Returns the normalized units that results from this one multiplied by another normalized units.
         /// </summary>
         /// <param name="m">Other units to multiply.</param>
         /// <returns>The result of the multiplication.</returns>
-        public NormalizedMeasureUnit Multiply( NormalizedMeasureUnit m ) => SafeCreate( MeasureUnits.Concat( m.MeasureUnits ) );
+        public CombinedMeasureUnit Multiply( CombinedMeasureUnit m ) => SafeCreate( MeasureUnits.Concat( m.MeasureUnits ) );
 
         /// <summary>
         /// Returns the normalized units that results from this one divided by another normalized units.
         /// </summary>
         /// <param name="m">The divisor.</param>
         /// <returns>The result of the division.</returns>
-        public NormalizedMeasureUnit DivideBy( NormalizedMeasureUnit m ) => SafeCreate( MeasureUnits.Concat( m.Invert().MeasureUnits ) );
+        public CombinedMeasureUnit DivideBy( CombinedMeasureUnit m ) => SafeCreate( MeasureUnits.Concat( m.Invert().MeasureUnits ) );
 
-        public static NormalizedMeasureUnit operator /( NormalizedMeasureUnit o1, NormalizedMeasureUnit o2 ) => o1.DivideBy( o2 );
-        public static NormalizedMeasureUnit operator *( NormalizedMeasureUnit o1, NormalizedMeasureUnit o2 ) => o1.Multiply( o2 );
-        public static NormalizedMeasureUnit operator ^( NormalizedMeasureUnit o, int exp ) => o.Power( exp );
+        public static CombinedMeasureUnit operator /( CombinedMeasureUnit o1, CombinedMeasureUnit o2 ) => o1.DivideBy( o2 );
+        public static CombinedMeasureUnit operator *( CombinedMeasureUnit o1, CombinedMeasureUnit o2 ) => o1.Multiply( o2 );
+        public static CombinedMeasureUnit operator ^( CombinedMeasureUnit o, int exp ) => o.Power( exp );
 
         /// <summary>
         /// Inverts this normalized units.
         /// </summary>
         /// <returns>The inverted units.</returns>
-        public NormalizedMeasureUnit Invert()
+        public CombinedMeasureUnit Invert()
         {
             if( _invert == null )
             {
-                Combinator c = new Combinator( Array.Empty<BasicMeasureUnit>() );
+                Combinator c = new Combinator( Array.Empty<ExponentMeasureUnit>() );
                 foreach( var m in MeasureUnits )
                 {
-                    if( m.MeasureUnit != None ) c.Add( m.MeasureUnit, -m.Exponent );
+                    if( m.AtomicMeasureUnit != None ) c.Add( m.AtomicMeasureUnit, -m.Exponent );
                 }
                 if( _invert == null ) _invert = c.GetResult();
             }
@@ -74,20 +74,20 @@ namespace CK.Core
         /// </summary>
         /// <param name="exp">The exponent.</param>
         /// <returns>The resulting normalized units.</returns>
-        public NormalizedMeasureUnit Power( int exp )
+        public CombinedMeasureUnit Power( int exp )
         {
             if( exp == 0 ) return None;
             if( exp == 1 ) return this;
             if( exp == -1 ) return Invert();
-            Combinator c = new Combinator( Array.Empty<BasicMeasureUnit>() );
+            Combinator c = new Combinator( Array.Empty<ExponentMeasureUnit>() );
             foreach( var m in MeasureUnits )
             {
-                if( m.MeasureUnit != None ) c.Add( m.MeasureUnit, m.Exponent * exp );
+                if( m.AtomicMeasureUnit != None ) c.Add( m.AtomicMeasureUnit, m.Exponent * exp );
             }
             return c.GetResult();
         }
 
-        internal static (string A, string N) ComputeNames( BasicMeasureUnit[] units )
+        internal static (string A, string N) ComputeNames( ExponentMeasureUnit[] units )
         {
             Debug.Assert( units.Length > 0 && units.All( m => m != null ) && units.Length > 1 );
             return (String.Join( ".", units.Select( u => u.Abbreviation ) ), String.Join( ".", units.Select( u => u.Name ) ));
@@ -95,21 +95,21 @@ namespace CK.Core
 
         struct Combinator
         {
-            readonly List<FundamentalMeasureUnit> _normM;
+            readonly List<AtomicMeasureUnit> _normM;
             readonly List<int> _normE;
 
-            public Combinator( IEnumerable<BasicMeasureUnit> units )
+            public Combinator( IEnumerable<ExponentMeasureUnit> units )
             {
-                _normM = new List<FundamentalMeasureUnit>();
+                _normM = new List<AtomicMeasureUnit>();
                 _normE = new List<int>();
                 foreach( var u in units )
                 {
                     Debug.Assert( u != null );
-                    if( u.MeasureUnit != FundamentalMeasureUnit.None ) Add( u.MeasureUnit, u.Exponent );
+                    if( u.AtomicMeasureUnit != FundamentalMeasureUnit.None ) Add( u.AtomicMeasureUnit, u.Exponent );
                 }
             }
 
-            public void Add( FundamentalMeasureUnit u, int exp )
+            public void Add( AtomicMeasureUnit u, int exp )
             {
                 for( int i = 0; i < _normM.Count; ++i )
                 {
@@ -123,30 +123,30 @@ namespace CK.Core
                 _normE.Add( exp );
             }
 
-            public NormalizedMeasureUnit GetResult()
+            public CombinedMeasureUnit GetResult()
             {
                 int count = _normM.Count;
                 if( count == 0 ) return None;
                 if( count == 1 )
                 {
                     int exp = _normE[0];
-                    return exp != 0 ? RegisterBasic( exp, _normM[0] ) : None;
+                    return exp != 0 ? RegisterExponent( exp, _normM[0] ) : None;
                 }
-                var result = new List<BasicMeasureUnit>( count );
+                var result = new List<ExponentMeasureUnit>( count );
                 for( int i = 0; i < count; ++i )
                 {
                     int exp = _normE[i];
-                    if( exp != 0 ) result.Add( RegisterBasic( exp, _normM[i] ) );
+                    if( exp != 0 ) result.Add( RegisterExponent( exp, _normM[i] ) );
                 }
                 count = result.Count;
                 if( count == 0 ) return None;
                 if( count == 1 ) return result[0];
                 result.Sort();
-                return RegisterNormalized( result.ToArray() );
+                return RegisterCombined( result.ToArray() );
             }
         }
 
-        internal static NormalizedMeasureUnit SafeCreate( IEnumerable<BasicMeasureUnit> units )
+        internal static CombinedMeasureUnit SafeCreate( IEnumerable<ExponentMeasureUnit> units )
         {
             return new Combinator( units ).GetResult();
         }
