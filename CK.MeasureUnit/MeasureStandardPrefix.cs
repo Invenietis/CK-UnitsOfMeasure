@@ -169,10 +169,10 @@ namespace CK.Core
             _allMetric = new MeasureStandardPrefix[] {
                 Yocto, Zepto, Atto, Femto, Pico, Nano, Micro, Milli, Centi, Deci, Deca,
                 Hecto, Kilo, Mega, Giga, Tera, Peta, Exa, Zetta, Yotta };
-            _allMetricIndex = _allMetric.Select( p => p.Factor.Exp10 ).ToArray();
+            _allMetricIndex = _allMetric.Select( p => (int)p.Factor.Exp10 ).ToArray();
 
             _allBinary = new MeasureStandardPrefix[] { Kibi, Mebi, Gibi, Tebi, Pebi, Exbi, Zebi, Yobi };
-            _allBinaryIndex = _allBinary.Select( p => p.Factor.Exp2 ).ToArray();
+            _allBinaryIndex = _allBinary.Select( p => (int)p.Factor.Exp2 ).ToArray();
 
             _prefixes = new Dictionary<string, MeasureStandardPrefix>();
             _prefixes.Add( String.Empty, None );

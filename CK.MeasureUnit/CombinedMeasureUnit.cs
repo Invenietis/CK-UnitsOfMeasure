@@ -18,14 +18,22 @@ namespace CK.Core
         internal CombinedMeasureUnit( (string A, string N) names, ExponentMeasureUnit[] units )
             : base( names.A, names.N )
         {
+            Debug.Assert( !units.Any( u => u.AtomicMeasureUnit == None ) );
             _units = units;
+            IsNormalized = units.All( u => u.AtomicMeasureUnit is FundamentalMeasureUnit );
         }
 
         private protected CombinedMeasureUnit( string abbreviation, string name )
             : base( abbreviation, name )
         {
             _units = new[] { (ExponentMeasureUnit)this };
+            IsNormalized = this is FundamentalMeasureUnit;
         }
+
+        /// <summary>
+        /// Gets whether this combined unit of measures only contains <see cref="FundamentalMeasureUnit"/>.
+        /// </summary>
+        public bool IsNormalized { get; }
 
         /// <summary>
         /// Gets the <see cref="ExponentMeasureUnit"/> that define this normalized measure.
@@ -63,7 +71,11 @@ namespace CK.Core
                 {
                     if( m.AtomicMeasureUnit != None ) c.Add( m.AtomicMeasureUnit, -m.Exponent );
                 }
-                if( _invert == null ) _invert = c.GetResult();
+                if( _invert == null )
+                {
+                    _invert = c.GetResult();
+                    _invert._invert = this;
+                }
             }
             return _invert;
         }

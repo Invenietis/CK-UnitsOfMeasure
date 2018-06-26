@@ -8,30 +8,29 @@ namespace CK.Core
 {
     /// <summary>
     /// An <see cref="AliasMeasureUnit"/> is a <see cref="AtomicMeasureUnit"/> that has its own unique abbreviation and name,
-    /// is defined by a <see cref="CombinedMeasureUnit"/> and bound to a normalized <see cref="CombinedMeasureUnit"/>
-    /// by a <see cref="FullFactor"/>. 
+    /// is defined by a <see cref="FullFactor"/> applied to a <see cref="CombinedMeasureUnit"/>. 
     /// </summary>
     public sealed class AliasMeasureUnit : AtomicMeasureUnit
     {
         internal AliasMeasureUnit(
-            (string A, string L) names,
+            string abbreviation, string name,
             FullFactor definitionFactor,
-            CombinedMeasureUnit definition,
-            FullFactor normalizedFactor,
-            CombinedMeasureUnit normalized )
-            : base(names.A, names.L)
+            CombinedMeasureUnit definition )
+            : base(abbreviation, name)
         {
+            DefinitionFactor = definitionFactor;
+            Definition = definition;
         }
 
-        public static (string A, string N) ComputeNames(MeasureStandardPrefix p, MeasureUnit u) => (p.Abbreviation + u.Abbreviation, p.Name + " " + u.Name.ToLowerInvariant());
-
+        /// <summary>
+        /// Gets the definition factor.
+        /// </summary>
         public FullFactor DefinitionFactor { get; }
 
+        /// <summary>
+        /// Gets the unit definition.
+        /// </summary>
         public CombinedMeasureUnit Definition { get; }
-
-        public FullFactor NormalizedFactor { get; }
-
-        public CombinedMeasureUnit NormalizedDefinition { get; }
 
     }
 }

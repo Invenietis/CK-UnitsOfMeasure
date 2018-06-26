@@ -5,17 +5,17 @@ using System.Text;
 namespace CK.Core
 {
     /// <summary>
-    /// Immutable struc that captures 2^<see cref="Exp2"/>.10^<see cref="Exp10"/>.
+    /// Immutable struct that captures 2^<see cref="Exp2"/>.10^<see cref="Exp10"/>.
     /// </summary>
     public struct FullFactor : IEquatable<FullFactor>
     {
         /// <summary>
         /// The neutral factor: <see cref="Factor"/> = 1 and <see cref="ExpFactor.Neutral"/>.
         /// </summary>
-        public static readonly FullFactor Neutral;
+        public static readonly FullFactor Neutral = new FullFactor( 1.0, ExpFactor.Neutral );
 
         /// <summary>
-        /// The (unfortunaletly) default factor is 0.
+        /// The default factor is 0 (unfortunaletly).
         /// </summary>
         public static readonly FullFactor Zero;
 
@@ -32,7 +32,7 @@ namespace CK.Core
         /// <summary>
         /// Gets whether this is the neutral factor.
         /// </summary>
-        public bool IsNeutral => Factor == 1 && ExpFactor.IsNeutral;
+        public bool IsNeutral => Factor == 1.0 && ExpFactor.IsNeutral;
 
         /// <summary>
         /// Gets whether this <see cref="Factor"/> is 0.
@@ -42,18 +42,54 @@ namespace CK.Core
         /// <summary>
         /// Initializes a new <see cref="FullFactor"/>.
         /// </summary>
-        /// <param name="exp2">The base 2 exponent.</param>
-        /// <param name="exp10">The base 10 exponent.</param>
+        /// <param name="f">The factor.</param>
+        /// <param name="e">The exponent factor.</param>
         public FullFactor( double f, ExpFactor e )
         {
             Factor = f;
             ExpFactor = e;
         }
 
+        /// <summary>
+        /// Initializes a new <see cref="FullFactor"/> with a <see cref="ExpFactor.Neutral"/>.
+        /// </summary>
+        /// <param name="f">The factor.</param>
+        public FullFactor( double f )
+            : this( f, ExpFactor.Neutral )
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new <see cref="FullFactor"/> with a <see cref="Factor"/> = 1.0.
+        /// </summary>
+        /// <param name="f">The exponent factor.</param>
+        public FullFactor( ExpFactor f )
+            : this( 1.0, f )
+        {
+        }
+
+        public static implicit operator FullFactor( double d ) => new FullFactor( d );
+        public static implicit operator FullFactor( ExpFactor e ) => new FullFactor( e );
+
+        /// <summary>
+        /// Returns this factor elevated to a given power.
+        /// </summary>
+        /// <param name="p">The power.</param>
+        /// <returns>The elevated full factor.</returns>
         public FullFactor Power( int p ) => new FullFactor( Math.Pow( Factor, p ), ExpFactor.Power( p ) );
 
+        /// <summary>
+        /// Returns this factor multiplied by another one.
+        /// </summary>
+        /// <param name="x">The factor to multiply with.</param>
+        /// <returns>The resulting full factor.</returns>
         public FullFactor Multiply( FullFactor x ) => new FullFactor( Factor * x.Factor, ExpFactor.Multiply( x.ExpFactor ) );
 
+        /// <summary>
+        /// Returns this factor divide by another one.
+        /// </summary>
+        /// <param name="x">The divisor.</param>
+        /// <returns>The resulting full factor.</returns>
         public FullFactor DivideBy( FullFactor x ) => new FullFactor( Factor / x.Factor, ExpFactor.DivideBy( x.ExpFactor ) );
 
         public double ToDouble() => Factor * ExpFactor.ToDouble();
@@ -65,6 +101,10 @@ namespace CK.Core
             if( Factor == 1.0 ) return ExpFactor.ToString();
             return Factor.ToString() + ExpFactor.ToString( true );
         }
+
+        public static bool operator ==( FullFactor f1, FullFactor f2 ) => f1.Equals( f2 );
+
+        public static bool operator !=( FullFactor f1, FullFactor f2 ) => !f1.Equals( f2 );
 
         public override bool Equals( object obj ) => obj is FullFactor f && Equals( f );
 

@@ -35,10 +35,18 @@ namespace CK.Core
 
         /// <summary>
         /// The kilogram is the unit of mass; it is equal to the mass of the international prototype of the kilogram.
-        /// This is the SI base unit of measure of weight.
+        /// This is the only SI base unit that incluedes a prefix. To avoid coping with this exception in the code, we
+        /// define it as a <see cref="PrefixedMeasureUnit"/> based on the gram (<see cref="MeasureStandardPrefix.Kilo"/>
+        /// of <see cref="Gram"/>) .
         /// Associated abbreviation is "kg".
         /// </summary>
-        public static readonly FundamentalMeasureUnit Kilogram;
+        public static readonly PrefixedMeasureUnit Kilogram;
+
+        /// <summary>
+        /// The gram is our fundamental unit of mass (see <see cref="Kilogram"/>).
+        /// Associated abbreviation is "g".
+        /// </summary>
+        public static readonly FundamentalMeasureUnit Gram;
 
         /// <summary>
         /// The second is the duration of 9192631770 periods of the radiation corresponding to the transition 
@@ -89,19 +97,19 @@ namespace CK.Core
         /// </summary>
         public static readonly FundamentalMeasureUnit Bit;
 
-        ///// <summary>
-        ///// A byte is now standardized as eight bits, as documented in ISO/IEC 2382-1:1993.
-        ///// The international standard IEC 80000-13 codified this common meaning.
-        ///// Associated trait is "B".
-        ///// </summary>
-        //public static readonly CKTrait Byte;
+        /// <summary>
+        /// A byte is now standardized as eight bits, as documented in ISO/IEC 2382-1:1993.
+        /// The international standard IEC 80000-13 codified this common meaning.
+        /// Associated abbreviation is "B" and it is an alias with a <see cref="ExpFactor"/> of 2^3 on <see cref="Bit"/>.
+        /// </summary>
+        public static readonly AliasMeasureUnit Byte;
 
         static MeasureUnit()
         {
             None = new FundamentalMeasureUnit( "", "None" );
             Unit = new FundamentalMeasureUnit( "#", "Unit" );
             Metre = new FundamentalMeasureUnit( "m", "Metre" );
-            Kilogram = new FundamentalMeasureUnit( "kg", "Kilogram" );
+            Gram = new FundamentalMeasureUnit( "g", "Gram" );
             Second = new FundamentalMeasureUnit( "s", "Second" );
             Ampere = new FundamentalMeasureUnit( "A", "Ampere" );
             Kelvin = new FundamentalMeasureUnit( "K", "Kelvin" );
@@ -114,7 +122,7 @@ namespace CK.Core
                 new KeyValuePair<string,MeasureUnit>( None.Abbreviation, None ),
                 new KeyValuePair<string,MeasureUnit>( Unit.Abbreviation, Unit ),
                 new KeyValuePair<string,MeasureUnit>( Metre.Abbreviation, Metre ),
-                new KeyValuePair<string,MeasureUnit>( Kilogram.Abbreviation, Kilogram ),
+                new KeyValuePair<string,MeasureUnit>( Gram.Abbreviation, Gram ),
                 new KeyValuePair<string,MeasureUnit>( Second.Abbreviation, Second ),
                 new KeyValuePair<string,MeasureUnit>( Ampere.Abbreviation, Ampere ),
                 new KeyValuePair<string,MeasureUnit>( Kelvin.Abbreviation, Kelvin ),
@@ -122,10 +130,11 @@ namespace CK.Core
                 new KeyValuePair<string,MeasureUnit>( Candela.Abbreviation, Candela ),
                 new KeyValuePair<string,MeasureUnit>( Bit.Abbreviation, Bit ),
             };
-            // Case sensitive is mandatory (mSv is not MSv - Milli vs. Mega).
+            // Case sensitivity is mandatory (mSv is not MSv - Milli vs. Mega).
             _units = new ConcurrentDictionary<string, MeasureUnit>( basics );
+            Kilogram = RegisterPrefixed( ExpFactor.Neutral, MeasureStandardPrefix.Kilo, Gram );
+            Byte = new AliasMeasureUnit( "B", "Byte", new FullFactor( new ExpFactor( 3, 0 ) ), Bit );
         }
-
 
         protected MeasureUnit( string abbreviation, string name )
         {
@@ -172,19 +181,67 @@ namespace CK.Core
         //    }
         //}
 
-        private protected static CombinedMeasureUnit RegisterCombined( ExponentMeasureUnit[] units)
+        /// <summary>
+        /// Defines an alias.
+        /// The same alias can be registered multiple times but it has to exactly match the previously registered one.
+        /// </summary>
+        /// <param name="abbreviation">
+        /// The unit of measure abbreviation.
+        /// This is the key that is used. It must not be null or empty.
+        /// </param>
+        /// <param name="name">The full name. Must not be null or empty.</param>
+        /// <param name="definitionFactor">
+        /// The factor that applies to the <see cref="AliasMeasureUnit.Definition"/>.
+        /// Must not be <see cref="FullFactor.Zero"/>.
+        /// </param>
+        /// <param name="definition">The definition. Can be any <see cref="CombinedMeasureUnit"/>.</param>
+        /// <returns>The alias unit of measure.</returns>
+        public static AliasMeasureUnit DefineAlias( string abbreviation, string name, FullFactor definitionFactor, CombinedMeasureUnit definition )
         {
-            var names = CombinedMeasureUnit.ComputeNames(units);
-            return Register(names.A, names.N, () => new CombinedMeasureUnit(names,units), null);
+            if( string.IsNullOrWhiteSpace( abbreviation ) ) throw new ArgumentException( "Must not be null or white space.", nameof( abbreviation ) );
+            if( string.IsNullOrWhiteSpace( name ) ) throw new ArgumentException( "Must not be null or white space.", nameof( name ) );
+            if( definitionFactor.IsZero ) throw new ArgumentException( "Must not be zero.", nameof( definitionFactor ) );
+            if( definition == null ) throw new ArgumentNullException( nameof( definition ) );
+            return RegisterAlias( abbreviation, name, definitionFactor, definition );
         }
 
-        private protected static ExponentMeasureUnit RegisterExponent(int exp, AtomicMeasureUnit u)
+        /// <summary>
+        /// Define a new fundamental unit of measure.
+        /// Just like <see cref="DefineAlias(string, string, FullFactor, CombinedMeasureUnit)"/>, the same fundamental unit
+        /// can be redefined multiple times as long as it is actually the same: for fundamental units, the <see cref="Name"/>
+        /// must be exaclty the same.
+        /// </summary>
+        /// <param name="abbreviation">
+        /// The unit of measure abbreviation.
+        /// This is the key that is used. It must not be null or empty.
+        /// </param>
+        /// <param name="name">The full name. Must not be null or empty.</param>
+        /// <returns>The alias unit of measure.</returns>
+        public static FundamentalMeasureUnit DefineFundamental( string abbreviation, string name )
+        {
+            if( string.IsNullOrWhiteSpace( abbreviation ) ) throw new ArgumentException( "Must not be null or white space.", nameof( abbreviation ) );
+            if( string.IsNullOrWhiteSpace( name ) ) throw new ArgumentException( "Must not be null or white space.", nameof( name ) );
+            return RegisterFundamental( abbreviation, name );
+        }
+
+        static AliasMeasureUnit RegisterAlias( string a, string n, FullFactor f, CombinedMeasureUnit d )
+        {
+            return Register( a, n, () => new AliasMeasureUnit( a, n, f, d ), m => m.DefinitionFactor == f && m.Definition == d );
+        }
+
+        internal static CombinedMeasureUnit RegisterCombined( ExponentMeasureUnit[] units )
+        {
+            var names = CombinedMeasureUnit.ComputeNames( units );
+            return Register( names.A, names.N, () => new CombinedMeasureUnit( names, units ), null );
+        }
+
+        internal static ExponentMeasureUnit RegisterExponent(int exp, AtomicMeasureUnit u)
         {
             var names = ExponentMeasureUnit.ComputeNames(exp, u);
             return Register(names.A, names.N, () => new ExponentMeasureUnit(names, exp, u), null);
         }
 
-        static internal PrefixedMeasureUnit RegisterPrefixed(ExpFactor adjustment, MeasureStandardPrefix p, AtomicMeasureUnit u)
+        internal static PrefixedMeasureUnit RegisterPrefixed(ExpFactor adjustment, MeasureStandardPrefix p, AtomicMeasureUnit u)
         {
             var names = PrefixedMeasureUnit.ComputeNames( adjustment, p, u);
             return Register(names.A, names.N, () => new PrefixedMeasureUnit(names, adjustment, p, u), null);

@@ -17,12 +17,12 @@ namespace CK.Core
         /// <summary>
         /// The base 2 exponent.
         /// </summary>
-        public readonly int Exp2;
+        public readonly short Exp2;
 
         /// <summary>
         /// The base 10 exponent.
         /// </summary>
-        public readonly int Exp10;
+        public readonly short Exp10;
 
         /// <summary>
         /// Gets whether this is the neutral factor.
@@ -36,8 +36,11 @@ namespace CK.Core
         /// <param name="exp10">The base 10 exponent.</param>
         public ExpFactor( int exp2, int exp10 )
         {
-            Exp2 = exp2;
-            Exp10 = exp10;
+            checked
+            {
+                Exp2 = (short)exp2;
+                Exp10 = (short)exp10;
+            }
         }
 
         public ExpFactor Power( int p ) => new ExpFactor( Exp2 * p, Exp10 * p );
