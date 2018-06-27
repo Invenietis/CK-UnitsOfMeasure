@@ -14,8 +14,11 @@ namespace CK.Core
     /// </summary>
     public partial class MeasureUnit
     {
+
         readonly ExponentMeasureUnit[] _units;
         MeasureUnit _invert;
+        FullFactor _normalizationFactor;
+        MeasureUnit _normalization;
 
         /// <summary>
         /// This ctor is used by <see cref="AtomicMeasureUnit"/>: it initializes a
@@ -23,12 +26,16 @@ namespace CK.Core
         /// </summary>
         /// <param name="abbreviation">The abbreviatiuon.</param>
         /// <param name="name">The name.</param>
-        private protected MeasureUnit( string abbreviation, string name )
+        private protected MeasureUnit( string abbreviation, string name, bool isNormalized )
         {
             Abbreviation = abbreviation;
             Name = name;
             _units = new[] { (ExponentMeasureUnit)this };
-            IsNormalized = this is FundamentalMeasureUnit;
+            if( isNormalized )
+            {
+                _normalizationFactor = FullFactor.Neutral;
+                _normalization = this;
+            }
         }
 
         internal MeasureUnit( (string A, string N) names, ExponentMeasureUnit[] units )
@@ -37,7 +44,11 @@ namespace CK.Core
             Abbreviation = names.A;
             Name = names.N;
             _units = units;
-            IsNormalized = units.All( u => u.AtomicMeasureUnit is FundamentalMeasureUnit );
+            if( units.All( u => u.IsNormalized ) )
+            {
+                _normalizationFactor = FullFactor.Neutral;
+                _normalization = this;
+            }
         }
 
         /// <summary>
@@ -51,14 +62,50 @@ namespace CK.Core
         public string Name { get; }
 
         /// <summary>
-        /// Gets whether this <see cref="MeasureUnits"/> only contains <see cref="FundamentalMeasureUnit"/>.
-        /// </summary>
-        public bool IsNormalized { get; }
-
-        /// <summary>
-        /// Gets the <see cref="ExponentMeasureUnit"/> that define this measure.
+        /// Gets the one or more <see cref="ExponentMeasureUnit"/> that define this measure.
         /// </summary>
         public IReadOnlyList<ExponentMeasureUnit> MeasureUnits => _units;
+
+        /// <summary>
+        /// Gets whether this <see cref="MeasureUnits"/> only contains <see cref="FundamentalMeasureUnit"/>.
+        /// </summary>
+        public bool IsNormalized => _normalization == this;
+
+        /// <summary>
+        /// Gets the factor that must be applied from this measure to its <see cref="Normalization"/>.
+        /// </summary>
+        public FullFactor NormalizationFactor
+        {
+            get
+            {
+                if( _normalization == null ) (_normalization, _normalizationFactor) = GetNormalization();
+                return _normalizationFactor;
+            }
+        }
+
+        /// <summary>
+        /// Gets the canonical form of this measure.
+        /// Its <see cref="IsNormalized"/> property is necessarily true.
+        /// </summary>
+        public MeasureUnit Normalization
+        {
+            get
+            {
+                if( _normalization == null ) (_normalization, _normalizationFactor) = GetNormalization();
+                return _normalization;
+            }
+        }
+
+        private protected virtual (MeasureUnit, FullFactor) GetNormalization()
+        {
+            Combinator measures = new Combinator( null );
+            var f = _units.Aggregate( FullFactor.Neutral, ( acc, m ) =>
+            {
+                measures.Add( m.Normalization.MeasureUnits );
+                return acc.Multiply( m.NormalizationFactor );
+            } );
+            return (measures.GetResult(), f);
+        }
 
         /// <summary>
         /// Returns the <see cref="MeasureUnit"/> that results from this one multiplied by another one.
@@ -85,7 +132,7 @@ namespace CK.Core
             if( exp == 0 ) return None;
             if( exp == 1 ) return this;
             if( exp == -1 ) return Invert();
-            Combinator c = new Combinator( Array.Empty<ExponentMeasureUnit>() );
+            Combinator c = new Combinator( null );
             foreach( var m in MeasureUnits )
             {
                 if( m.AtomicMeasureUnit != None ) c.Add( m.AtomicMeasureUnit, m.Exponent * exp );
@@ -101,7 +148,7 @@ namespace CK.Core
         {
             if( _invert == null )
             {
-                Combinator c = new Combinator( Array.Empty<ExponentMeasureUnit>() );
+                Combinator c = new Combinator( null );
                 foreach( var m in MeasureUnits )
                 {
                     if( m.AtomicMeasureUnit != None ) c.Add( m.AtomicMeasureUnit, -m.Exponent );
@@ -128,10 +175,15 @@ namespace CK.Core
             {
                 _normM = new List<AtomicMeasureUnit>();
                 _normE = new List<int>();
+                if( units != null ) Add( units );
+            }
+
+            public void Add( IEnumerable<ExponentMeasureUnit> units )
+            {
                 foreach( var u in units )
                 {
                     Debug.Assert( u != null );
-                    if( u.AtomicMeasureUnit != FundamentalMeasureUnit.None ) Add( u.AtomicMeasureUnit, u.Exponent );
+                    if( u.AtomicMeasureUnit != None ) Add( u.AtomicMeasureUnit, u.Exponent );
                 }
             }
 

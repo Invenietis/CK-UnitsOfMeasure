@@ -88,6 +88,7 @@ namespace CK.Core.Tests
             var ampere = MeasureUnit.Ampere;
             var candela = MeasureUnit.Candela;
             var squaredMeter = metre^2;
+            squaredMeter.Abbreviation.Should().Be( "m2" );
 
             var hertz = MeasureUnit.None / second;
             hertz.Abbreviation.Should().Be( "s-1" );

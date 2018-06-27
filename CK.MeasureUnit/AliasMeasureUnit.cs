@@ -16,7 +16,7 @@ namespace CK.Core
             string abbreviation, string name,
             FullFactor definitionFactor,
             MeasureUnit definition )
-            : base(abbreviation, name)
+            : base( abbreviation, name, false )
         {
             DefinitionFactor = definitionFactor;
             Definition = definition;
@@ -32,7 +32,10 @@ namespace CK.Core
         /// </summary>
         public MeasureUnit Definition { get; }
 
-
+        private protected override (MeasureUnit, FullFactor) GetNormalization()
+        {
+            return (Definition.Normalization, Definition.NormalizationFactor.Multiply( DefinitionFactor ));
+        }
 
 
     }

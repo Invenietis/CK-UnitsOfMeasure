@@ -15,24 +15,16 @@ namespace CK.Core
     /// </summary>
     public class FundamentalMeasureUnit : AtomicMeasureUnit
     {
-        ///// <summary>
-        ///// A byte is now standardized as eight bits, as documented in ISO/IEC 2382-1:1993.
-        ///// The international standard IEC 80000-13 codified this common meaning.
-        ///// Associated trait is "B".
-        ///// </summary>
-        //public static readonly CKTrait Byte;
-
-
         internal FundamentalMeasureUnit( string abbreviation, string name )
-            : base(abbreviation, name)
+            : base( abbreviation, name, true )
         {
         }
 
         public ExponentMeasureUnit WithExponent( int exp )
         {
-            if (exp == 0) return None;
-            if (exp == 1) return this;
-            return RegisterExponent(exp, this);
+            if( exp == 0 ) return None;
+            if( exp == 1 ) return this;
+            return RegisterExponent( exp, this );
         }
 
     }

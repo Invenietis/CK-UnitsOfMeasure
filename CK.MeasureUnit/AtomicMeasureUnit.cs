@@ -6,8 +6,8 @@ namespace CK.Core
 {
     public class AtomicMeasureUnit : ExponentMeasureUnit, IComparable<AtomicMeasureUnit>
     {
-        private protected AtomicMeasureUnit( string abbreviation, string name )
-            : base( abbreviation, name )
+        private protected AtomicMeasureUnit( string abbreviation, string name, bool isNormalized )
+            : base( abbreviation, name, isNormalized )
         {
         }
 

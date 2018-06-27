@@ -9,25 +9,20 @@ namespace CK.Core
 {
     /// <summary>
     /// A <see cref="ExponentMeasureUnit"/> is an exponentiation of a <see cref="Core.AtomicMeasureUnit"/>
-    /// (like "m^3", "s^-1", "Pa^3" or "dm2").
+    /// (like "m3", "s-1", "Pa3" or "dm2").
     /// </summary>
     public class ExponentMeasureUnit : MeasureUnit, IComparable<ExponentMeasureUnit>
     {
-        internal ExponentMeasureUnit((string A, string N) names, int exp, AtomicMeasureUnit u)
-            : base(names.A, names.N)
+        internal ExponentMeasureUnit( (string A, string N) names, int exp, AtomicMeasureUnit u )
+            : base( names.A, names.N, u.IsNormalized )
         {
-            Debug.Assert(exp != 0);
+            Debug.Assert( exp != 0 );
             Exponent = exp;
             AtomicMeasureUnit = u;
         }
 
-        /// <summary>
-        /// Constructor for <see cref="FundamentalMeasureUnit"/>
-        /// </summary>
-        /// <param name="abbreviation">The abbreviation.</param>
-        /// <param name="name">The full name.</param>
-        private protected ExponentMeasureUnit( string abbreviation, string name )
-            : base( abbreviation, name )
+        private protected ExponentMeasureUnit( string abbreviation, string name, bool isNormalized )
+            : base( abbreviation, name, isNormalized )
         {
             Exponent = 1;
             AtomicMeasureUnit = (AtomicMeasureUnit)this;
@@ -59,5 +54,11 @@ namespace CK.Core
             int cmp = Exponent.CompareTo(other.Exponent);
             return cmp == 0 ? AtomicMeasureUnit.CompareTo(other.AtomicMeasureUnit) : -cmp;
         }
+
+        private protected override (MeasureUnit, FullFactor) GetNormalization()
+        {
+            return (AtomicMeasureUnit.Normalization.Power( Exponent ), AtomicMeasureUnit.NormalizationFactor.Power( Exponent ));
+        }
+
     }
 }
