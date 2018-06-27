@@ -43,9 +43,11 @@ namespace CK.Core
         /// <summary>
         /// Gets the measure that this <see cref="PrefixedMeasureUnit"/> decorates.
         /// This masks the <see cref="ExponentMeasureUnit.AtomicMeasureUnit"/> property and this is
-        /// a valid example of masking language feature.
+        /// a valid example of the C# masking language feature.
         /// </summary>
         public new AtomicMeasureUnit AtomicMeasureUnit { get; }
+
+
 
     }
 }

@@ -6,7 +6,7 @@ namespace CK.Core.Tests
 {
 
     [TestFixture]
-    public class CombinedMeasureUnitTests
+    public class MeasureUnitTests
     {
         [Test]
         public void simple_inversion()

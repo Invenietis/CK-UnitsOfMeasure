@@ -8,10 +8,7 @@ using System.Text.RegularExpressions;
 
 namespace CK.Core
 {
-    /// <summary>
-    /// Base class for all measure unit. 
-    /// </summary>
-    public abstract partial class MeasureUnit
+    public partial class MeasureUnit
     {
         /// <summary>
         /// Dimensionles unit. Associated abbreviation is "" (the empty string) and its name is "None".

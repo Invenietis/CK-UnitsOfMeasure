@@ -8,10 +8,7 @@ using System.Text.RegularExpressions;
 
 namespace CK.Core
 {
-    /// <summary>
-    /// Base class for all measure unit. 
-    /// </summary>
-    public abstract partial class MeasureUnit
+    public partial class MeasureUnit
     {
 
         //static Regex _rUnit = new Regex( @"(?<1>[^\.\^]+)(\^(?<2>-?\d+))?", RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture );

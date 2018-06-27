@@ -5,15 +5,13 @@ using System.Text;
 using System.IO;
 using System.Collections.Concurrent;
 using System.Text.RegularExpressions;
+using System.Diagnostics;
 
 namespace CK.Core
 {
-    /// <summary>
-    /// Base class for all measure unit. 
-    /// </summary>
-    public abstract partial class MeasureUnit
+    public partial class MeasureUnit
     {
-        static readonly ConcurrentDictionary<string, MeasureUnit> _units;
+        static readonly ConcurrentDictionary<string, MeasureUnit> _allUnits;
 
         static MeasureUnit()
         {
@@ -42,7 +40,7 @@ namespace CK.Core
                 new KeyValuePair<string,MeasureUnit>( Bit.Abbreviation, Bit ),
             };
             // Case sensitivity is mandatory (mSv is not MSv - Milli vs. Mega).
-            _units = new ConcurrentDictionary<string, MeasureUnit>( basics );
+            _allUnits = new ConcurrentDictionary<string, MeasureUnit>( basics );
             Kilogram = RegisterPrefixed( ExpFactor.Neutral, MeasureStandardPrefix.Kilo, Gram );
             Byte = new AliasMeasureUnit( "B", "Byte", new FullFactor( new ExpFactor( 3, 0 ) ), Bit );
         }
@@ -61,9 +59,9 @@ namespace CK.Core
         /// The factor that applies to the <see cref="AliasMeasureUnit.Definition"/>.
         /// Must not be <see cref="FullFactor.Zero"/>.
         /// </param>
-        /// <param name="definition">The definition. Can be any <see cref="CombinedMeasureUnit"/>.</param>
+        /// <param name="definition">The definition. Can be any <see cref="MeasureUnit"/>.</param>
         /// <returns>The alias unit of measure.</returns>
-        public static AliasMeasureUnit DefineAlias( string abbreviation, string name, FullFactor definitionFactor, CombinedMeasureUnit definition )
+        public static AliasMeasureUnit DefineAlias( string abbreviation, string name, FullFactor definitionFactor, MeasureUnit definition )
         {
             if( string.IsNullOrWhiteSpace( abbreviation ) ) throw new ArgumentException( "Must not be null or white space.", nameof( abbreviation ) );
             if( string.IsNullOrWhiteSpace( name ) ) throw new ArgumentException( "Must not be null or white space.", nameof( name ) );
@@ -74,7 +72,7 @@ namespace CK.Core
 
         /// <summary>
         /// Define a new fundamental unit of measure.
-        /// Just like <see cref="DefineAlias(string, string, FullFactor, CombinedMeasureUnit)"/>, the same fundamental unit
+        /// Just like <see cref="DefineAlias(string, string, FullFactor, MeasureUnit)"/>, the same fundamental unit
         /// can be redefined multiple times as long as it is actually the same: for fundamental units, the <see cref="Name"/>
         /// must be exaclty the same.
         /// </summary>
@@ -91,15 +89,16 @@ namespace CK.Core
             return RegisterFundamental( abbreviation, name );
         }
 
-        static AliasMeasureUnit RegisterAlias( string a, string n, FullFactor f, CombinedMeasureUnit d )
+        static AliasMeasureUnit RegisterAlias( string a, string n, FullFactor f, MeasureUnit d )
         {
             return Register( a, n, () => new AliasMeasureUnit( a, n, f, d ), m => m.DefinitionFactor == f && m.Definition == d );
         }
 
-        internal static CombinedMeasureUnit RegisterCombined( ExponentMeasureUnit[] units )
+        internal static MeasureUnit RegisterCombined( ExponentMeasureUnit[] units )
         {
-            var names = CombinedMeasureUnit.ComputeNames( units );
-            return Register( names.A, names.N, () => new CombinedMeasureUnit( names, units ), null );
+            Debug.Assert( units.Length > 0 && units.All( m => m != null ) && units.Length > 1 );
+            var names = (String.Join( ".", units.Select( u => u.Abbreviation ) ), String.Join( ".", units.Select( u => u.Name ) ));
+            return Register( names.Item1, names.Item2, () => new MeasureUnit( names, units ), null );
         }
 
         internal static ExponentMeasureUnit RegisterExponent(int exp, AtomicMeasureUnit u)
@@ -126,7 +125,7 @@ namespace CK.Core
             if (m == null)
             {
                 var newOne = creator();
-                _units.GetOrAdd(abbreviation, newOne);
+                _allUnits.GetOrAdd(abbreviation, newOne);
                 m = CheckSingleRegistration(abbreviation, name, checker );
             }
             return m;
@@ -138,7 +137,7 @@ namespace CK.Core
             T result = null;
             // If they are not the same (null included) or if the type is not the right one or 
             // there is a check function that fails, this an error.
-            if( _units.TryGetValue(abbreviation, out var m)
+            if( _allUnits.TryGetValue(abbreviation, out var m)
                 && 
                 (m.Abbreviation != abbreviation
                  || m.Name != name

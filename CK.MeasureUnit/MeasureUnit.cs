@@ -5,26 +5,189 @@ using System.Text;
 using System.IO;
 using System.Collections.Concurrent;
 using System.Text.RegularExpressions;
+using System.Diagnostics;
 
 namespace CK.Core
 {
     /// <summary>
-    /// Base class for all measure unit. 
+    /// The base class for all measure unit also handles the combination of multiples <see cref="MeasureUnit"/>.
     /// </summary>
-    public abstract partial class MeasureUnit
+    public partial class MeasureUnit
     {
-        protected MeasureUnit( string abbreviation, string name )
+        readonly ExponentMeasureUnit[] _units;
+        MeasureUnit _invert;
+
+        /// <summary>
+        /// This ctor is used by <see cref="AtomicMeasureUnit"/>: it initializes a
+        /// MeasureUnit bound to itself.
+        /// </summary>
+        /// <param name="abbreviation">The abbreviatiuon.</param>
+        /// <param name="name">The name.</param>
+        private protected MeasureUnit( string abbreviation, string name )
         {
             Abbreviation = abbreviation;
             Name = name;
+            _units = new[] { (ExponentMeasureUnit)this };
+            IsNormalized = this is FundamentalMeasureUnit;
         }
 
+        internal MeasureUnit( (string A, string N) names, ExponentMeasureUnit[] units )
+        {
+            Debug.Assert( !units.Any( u => u.AtomicMeasureUnit == None ) );
+            Abbreviation = names.A;
+            Name = names.N;
+            _units = units;
+            IsNormalized = units.All( u => u.AtomicMeasureUnit is FundamentalMeasureUnit );
+        }
+
+        /// <summary>
+        /// Gets the abbreviation that identifies this measure.
+        /// </summary>
         public string Abbreviation { get; }
 
+        /// <summary>
+        /// Gets the long name of this measure.
+        /// </summary>
         public string Name { get; }
 
+        /// <summary>
+        /// Gets whether this <see cref="MeasureUnits"/> only contains <see cref="FundamentalMeasureUnit"/>.
+        /// </summary>
+        public bool IsNormalized { get; }
+
+        /// <summary>
+        /// Gets the <see cref="ExponentMeasureUnit"/> that define this measure.
+        /// </summary>
+        public IReadOnlyList<ExponentMeasureUnit> MeasureUnits => _units;
+
+        /// <summary>
+        /// Returns the <see cref="MeasureUnit"/> that results from this one multiplied by another one.
+        /// </summary>
+        /// <param name="m">Other units to multiply.</param>
+        /// <returns>The result of the multiplication.</returns>
+        public MeasureUnit Multiply( MeasureUnit m ) => Combinator.Create( MeasureUnits.Concat( m.MeasureUnits ) );
+
+        /// <summary>
+        /// Returns the <see cref="MeasureUnit"/> that results from this one divided by another one.
+        /// </summary>
+        /// <param name="m">The divisor.</param>
+        /// <returns>The result of the division.</returns>
+        public MeasureUnit DivideBy( MeasureUnit m ) => Combinator.Create( MeasureUnits.Concat( m.Invert().MeasureUnits ) );
+
+        /// <summary>
+        /// Returns this measure of units elevated to a given power.
+        /// Note that when <paramref name="exp"/> is 0, <see cref="MeasureUnit.None"/> is returned.
+        /// </summary>
+        /// <param name="exp">The exponent.</param>
+        /// <returns>The resulting normalized units.</returns>
+        public MeasureUnit Power( int exp )
+        {
+            if( exp == 0 ) return None;
+            if( exp == 1 ) return this;
+            if( exp == -1 ) return Invert();
+            Combinator c = new Combinator( Array.Empty<ExponentMeasureUnit>() );
+            foreach( var m in MeasureUnits )
+            {
+                if( m.AtomicMeasureUnit != None ) c.Add( m.AtomicMeasureUnit, m.Exponent * exp );
+            }
+            return c.GetResult();
+        }
+
+        /// <summary>
+        /// Inverts this <see cref="MeasureUnit"/>.
+        /// </summary>
+        /// <returns>The inverted units.</returns>
+        public MeasureUnit Invert()
+        {
+            if( _invert == null )
+            {
+                Combinator c = new Combinator( Array.Empty<ExponentMeasureUnit>() );
+                foreach( var m in MeasureUnits )
+                {
+                    if( m.AtomicMeasureUnit != None ) c.Add( m.AtomicMeasureUnit, -m.Exponent );
+                }
+                if( _invert == null )
+                {
+                    _invert = c.GetResult();
+                    _invert._invert = this;
+                }
+            }
+            return _invert;
+        }
+
+        public static MeasureUnit operator /( MeasureUnit o1, MeasureUnit o2 ) => o1.DivideBy( o2 );
+        public static MeasureUnit operator *( MeasureUnit o1, MeasureUnit o2 ) => o1.Multiply( o2 );
+        public static MeasureUnit operator ^( MeasureUnit o, int exp ) => o.Power( exp );
+
+        struct Combinator
+        {
+            readonly List<AtomicMeasureUnit> _normM;
+            readonly List<int> _normE;
+
+            public Combinator( IEnumerable<ExponentMeasureUnit> units )
+            {
+                _normM = new List<AtomicMeasureUnit>();
+                _normE = new List<int>();
+                foreach( var u in units )
+                {
+                    Debug.Assert( u != null );
+                    if( u.AtomicMeasureUnit != FundamentalMeasureUnit.None ) Add( u.AtomicMeasureUnit, u.Exponent );
+                }
+            }
+
+            public void Add( AtomicMeasureUnit u, int exp )
+            {
+                for( int i = 0; i < _normM.Count; ++i )
+                {
+                    if( _normM[i] == u )
+                    {
+                        _normE[i] += exp;
+                        return;
+                    }
+                }
+                _normM.Add( u );
+                _normE.Add( exp );
+            }
+
+            public MeasureUnit GetResult()
+            {
+                int count = _normM.Count;
+                if( count == 0 ) return None;
+                if( count == 1 )
+                {
+                    int exp = _normE[0];
+                    return exp != 0 ? RegisterExponent( exp, _normM[0] ) : None;
+                }
+                var result = new List<ExponentMeasureUnit>( count );
+                for( int i = 0; i < count; ++i )
+                {
+                    int exp = _normE[i];
+                    if( exp != 0 ) result.Add( RegisterExponent( exp, _normM[i] ) );
+                }
+                count = result.Count;
+                if( count == 0 ) return None;
+                if( count == 1 ) return result[0];
+                result.Sort();
+                return RegisterCombined( result.ToArray() );
+            }
+
+            public static MeasureUnit Create( IEnumerable<ExponentMeasureUnit> units )
+            {
+                return new Combinator( units ).GetResult();
+            }
+        }
+
+        /// <summary>
+        /// Returns the abbreviation optionally suffixed with its " (<see cref="Name"/>)".
+        /// </summary>
+        /// <param name="withName">True to include the Name.</param>
+        /// <returns>This measure abbreviation and name.</returns>
         public string ToString( bool withName ) => withName ? $"{Abbreviation} ({Name})" : Abbreviation;
 
+        /// <summary>
+        /// Overridden to return the <see cref="Abbreviation"/>.
+        /// </summary>
+        /// <returns>This unit's abbreviation.</returns>
         public override string ToString() => Abbreviation;
 
     }
