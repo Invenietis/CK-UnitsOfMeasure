@@ -41,23 +41,26 @@ namespace CK.Core
         /// </summary>
         public AtomicMeasureUnit AtomicMeasureUnit { get; }
 
-        public static (string A, string N) ComputeNames(int exp, AtomicMeasureUnit u)
+        public static (string A, string N) ComputeNames( int exp, AtomicMeasureUnit u )
         {
-            if (exp == 1) return (u.Abbreviation, u.Name);
+            if( exp == 1 ) return (u.Abbreviation, u.Name);
             string e = exp.ToString();
             return (u.Abbreviation + e, u.Name + "^" + e);
         }
 
-        public int CompareTo(ExponentMeasureUnit other)
+        public int CompareTo( ExponentMeasureUnit other )
         {
-            if (other == null) return 1;
-            int cmp = Exponent.CompareTo(other.Exponent);
-            return cmp == 0 ? AtomicMeasureUnit.CompareTo(other.AtomicMeasureUnit) : -cmp;
+            if( other == null ) return 1;
+            int cmp = Exponent.CompareTo( other.Exponent );
+            return cmp == 0 ? AtomicMeasureUnit.CompareTo( other.AtomicMeasureUnit ) : -cmp;
         }
 
         private protected override (MeasureUnit, FullFactor) GetNormalization()
         {
-            return (AtomicMeasureUnit.Normalization.Power( Exponent ), AtomicMeasureUnit.NormalizationFactor.Power( Exponent ));
+            return (
+                     AtomicMeasureUnit.Normalization.Power( Exponent ),
+                     AtomicMeasureUnit.NormalizationFactor.Power( Exponent )
+                   );
         }
 
     }

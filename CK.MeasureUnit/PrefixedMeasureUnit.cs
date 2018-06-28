@@ -13,8 +13,8 @@ namespace CK.Core
     /// </summary>
     public sealed class PrefixedMeasureUnit : AtomicMeasureUnit
     {
-        internal PrefixedMeasureUnit((string A, string N) names, ExpFactor adjusment, MeasureStandardPrefix p, AtomicMeasureUnit u, bool isNormalized)
-            : base(names.A, names.N, isNormalized )
+        internal PrefixedMeasureUnit( (string A, string N) names, ExpFactor adjusment, MeasureStandardPrefix p, AtomicMeasureUnit u, bool isNormalized )
+            : base( names.A, names.N, isNormalized )
         {
             Debug.Assert( p != MeasureStandardPrefix.None );
             AdjustmentFactor = adjusment;
@@ -49,9 +49,12 @@ namespace CK.Core
 
         private protected override (MeasureUnit, FullFactor) GetNormalization()
         {
-            return (AtomicMeasureUnit.Normalization, AtomicMeasureUnit.NormalizationFactor.Multiply( Prefix.Factor ).Multiply( AdjustmentFactor ));
+            return (
+                        AtomicMeasureUnit.Normalization,
+                        AtomicMeasureUnit.NormalizationFactor
+                                        .Multiply( Prefix.Factor )
+                                        .Multiply( AdjustmentFactor )
+                    );
         }
-
-
     }
 }

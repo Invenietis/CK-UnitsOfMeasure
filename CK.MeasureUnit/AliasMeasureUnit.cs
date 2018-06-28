@@ -34,8 +34,12 @@ namespace CK.Core
 
         private protected override (MeasureUnit, FullFactor) GetNormalization()
         {
-            return (Definition.Normalization, Definition.NormalizationFactor.Multiply( DefinitionFactor ));
+            return (
+                     Definition.Normalization,
+                     Definition.NormalizationFactor.Multiply( DefinitionFactor )
+                   );
         }
+
 
 
     }
