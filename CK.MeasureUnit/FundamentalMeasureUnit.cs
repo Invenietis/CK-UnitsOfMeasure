@@ -15,16 +15,9 @@ namespace CK.Core
     /// </summary>
     public class FundamentalMeasureUnit : AtomicMeasureUnit
     {
-        internal FundamentalMeasureUnit( string abbreviation, string name )
-            : base( abbreviation, name, true )
+        internal FundamentalMeasureUnit( string abbreviation, string name, bool isNormalized )
+            : base( abbreviation, name, isNormalized )
         {
-        }
-
-        public ExponentMeasureUnit WithExponent( int exp )
-        {
-            if( exp == 0 ) return None;
-            if( exp == 1 ) return this;
-            return RegisterExponent( exp, this );
         }
 
     }

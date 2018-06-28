@@ -18,7 +18,7 @@ namespace CK.Core.Tests
             var decimeter = MeasureStandardPrefix.Deci[metre];
             var squaredDecimeter = decimeter ^ 2;
             squaredDecimeter.Normalization.Should().Be( squaredMeter );
-            squaredDecimeter.NormalizationFactor.Should().Be( new FullFactor( new ExpFactor( 0, -2 ) ), "1 dm2 = 10-2 m2"  );
+            squaredDecimeter.NormalizationFactor.Should().Be( new FullFactor( new ExpFactor( 0, -2 ) ), "1 dm2 = 10-2 m2" );
 
             var centimeter = MeasureStandardPrefix.Centi[metre];
             var squaredCentimeter = centimeter ^ 2;
@@ -53,12 +53,32 @@ namespace CK.Core.Tests
             speed.IsNormalized.Should().BeTrue();
 
             var kilometre = MeasureStandardPrefix.Kilo[metre];
-            var hour = MeasureUnit.DefineAlias( "h", "Hour", 60*60, second );
+            var hour = MeasureUnit.DefineAlias( "h", "Hour", 60 * 60, second );
             var speed2 = kilometre / hour;
             speed2.IsNormalized.Should().BeFalse();
 
             speed2.Normalization.Should().BeSameAs( speed );
             speed2.NormalizationFactor.ToDouble().Should().BeApproximately( 0.2777777778, 1e-10, "1 m/s = 0.277778 km/h" );
+        }
+
+
+        [Test]
+        public void the_kilogram_is_now_the_normalized_form()
+        {
+            var metre = MeasureUnit.Metre;
+            var second = MeasureUnit.Second;
+            var kilogram = MeasureUnit.Kilogram;
+
+            var newton = kilogram * metre * (second ^ -2);
+            newton.Abbreviation.Should().Be( "kg.m.s-2" );
+
+            // With FundamentalMeasureUnit as the only normalized form:
+            //newton.Normalization.Abbreviation.Should().Be( "g.m.s-2" );
+            //newton.NormalizationFactor.Should().Be( new FullFactor( new ExpFactor( 0, 3 ) ) );
+
+            // A PrefixedMeasureUnit can be the normalized form:
+            newton.Normalization.Abbreviation.Should().Be( "kg.m.s-2" );
+            newton.NormalizationFactor.Should().Be( FullFactor.Neutral );
         }
 
     }

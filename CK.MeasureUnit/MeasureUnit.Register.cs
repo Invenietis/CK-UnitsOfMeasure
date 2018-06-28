@@ -15,16 +15,16 @@ namespace CK.Core
 
         static MeasureUnit()
         {
-            None = new FundamentalMeasureUnit( "", "None" );
-            Unit = new FundamentalMeasureUnit( "#", "Unit" );
-            Metre = new FundamentalMeasureUnit( "m", "Metre" );
-            Gram = new FundamentalMeasureUnit( "g", "Gram" );
-            Second = new FundamentalMeasureUnit( "s", "Second" );
-            Ampere = new FundamentalMeasureUnit( "A", "Ampere" );
-            Kelvin = new FundamentalMeasureUnit( "K", "Kelvin" );
-            Mole = new FundamentalMeasureUnit( "mol", "Mole" );
-            Candela = new FundamentalMeasureUnit( "cd", "Candela" );
-            Bit = new FundamentalMeasureUnit( "b", "Bit" );
+            None = new FundamentalMeasureUnit( "", "None", true );
+            Unit = new FundamentalMeasureUnit( "#", "Unit", true );
+            Metre = new FundamentalMeasureUnit( "m", "Metre", true );
+            Gram = new FundamentalMeasureUnit( "g", "Gram", false );
+            Second = new FundamentalMeasureUnit( "s", "Second", true );
+            Ampere = new FundamentalMeasureUnit( "A", "Ampere", true );
+            Kelvin = new FundamentalMeasureUnit( "K", "Kelvin", true );
+            Mole = new FundamentalMeasureUnit( "mol", "Mole", true );
+            Candela = new FundamentalMeasureUnit( "cd", "Candela", true );
+            Bit = new FundamentalMeasureUnit( "b", "Bit", true );
 
             var basics = new[]
             {
@@ -41,7 +41,7 @@ namespace CK.Core
             };
             // Case sensitivity is mandatory (mSv is not MSv - Milli vs. Mega).
             _allUnits = new ConcurrentDictionary<string, MeasureUnit>( basics );
-            Kilogram = RegisterPrefixed( ExpFactor.Neutral, MeasureStandardPrefix.Kilo, Gram );
+            Kilogram = RegisterPrefixed( ExpFactor.Neutral, MeasureStandardPrefix.Kilo, Gram, true );
             Byte = new AliasMeasureUnit( "B", "Byte", new FullFactor( new ExpFactor( 3, 0 ) ), Bit );
         }
 
@@ -74,19 +74,30 @@ namespace CK.Core
         /// Define a new fundamental unit of measure.
         /// Just like <see cref="DefineAlias(string, string, FullFactor, MeasureUnit)"/>, the same fundamental unit
         /// can be redefined multiple times as long as it is actually the same: for fundamental units, the <see cref="Name"/>
-        /// must be exaclty the same.
+        /// (and the normalizedPrefix if any) must be exaclty the same.
         /// </summary>
         /// <param name="abbreviation">
         /// The unit of measure abbreviation.
         /// This is the key that is used. It must not be null or empty.
         /// </param>
         /// <param name="name">The full name. Must not be null or empty.</param>
-        /// <returns>The alias unit of measure.</returns>
-        public static FundamentalMeasureUnit DefineFundamental( string abbreviation, string name )
+        /// <param name="normalizedPrefix">
+        /// Optional prefix to be used for units where the normalized unit should not be the <see cref="FundamentalMeasureUnit"/> but one of its
+        /// <see cref="PrefixedMeasureUnit"/>. This is the case for the "g"/"Gram" and the "kg"/"Kilogram".
+        /// Defaults to <see cref="MeasureStandardPrefix.None"/>: by default a fundamental unit is the normalized one.
+        /// </param>
+        /// <returns>The fundamental unit of measure.</returns>
+        public static FundamentalMeasureUnit DefineFundamental( string abbreviation, string name, MeasureStandardPrefix normalizedPrefix = null )
         {
             if( string.IsNullOrWhiteSpace( abbreviation ) ) throw new ArgumentException( "Must not be null or white space.", nameof( abbreviation ) );
             if( string.IsNullOrWhiteSpace( name ) ) throw new ArgumentException( "Must not be null or white space.", nameof( name ) );
-            return RegisterFundamental( abbreviation, name );
+            if( normalizedPrefix != null && normalizedPrefix != MeasureStandardPrefix.None )
+            {
+                return RegisterFundamental( abbreviation, name, true );
+            }
+            var f = RegisterFundamental( abbreviation, name, false );
+            RegisterPrefixed( ExpFactor.Neutral, normalizedPrefix, f, true );
+            return f;
         }
 
         static AliasMeasureUnit RegisterAlias( string a, string n, FullFactor f, MeasureUnit d )
@@ -107,15 +118,22 @@ namespace CK.Core
             return Register(names.A, names.N, () => new ExponentMeasureUnit(names, exp, u), null);
         }
 
-        internal static PrefixedMeasureUnit RegisterPrefixed(ExpFactor adjustment, MeasureStandardPrefix p, AtomicMeasureUnit u)
+        /// <summary>
+        /// The isNormalized is nullable: when automatically creating PrefixedUnit this is null and :
+        ///  - if the unit must be created it won't be the normalized one.
+        ///  - if the unit is found, we don't check the potential race condition.
+        /// Only when explicitly registering/creating the unit with true or false, the resulting unit IsNormalized
+        /// property is checked to prevent race conditions.
+        /// </summary>
+        internal static PrefixedMeasureUnit RegisterPrefixed( ExpFactor adjustment, MeasureStandardPrefix p, AtomicMeasureUnit u, bool? isNormalized = null )
         {
             var names = PrefixedMeasureUnit.ComputeNames( adjustment, p, u);
-            return Register(names.A, names.N, () => new PrefixedMeasureUnit(names, adjustment, p, u), null);
+            return Register(names.A, names.N, () => new PrefixedMeasureUnit(names, adjustment, p, u, isNormalized ?? false), m => !isNormalized.HasValue || m.IsNormalized == isNormalized);
         }
 
-        static FundamentalMeasureUnit RegisterFundamental(string abbreviation, string name)
+        static FundamentalMeasureUnit RegisterFundamental(string abbreviation, string name, bool isNormalized )
         {
-            return Register( abbreviation, name, () => new FundamentalMeasureUnit(abbreviation,name), null );
+            return Register( abbreviation, name, () => new FundamentalMeasureUnit(abbreviation,name,isNormalized), m => m.IsNormalized == isNormalized );
         }
 
         static T Register<T>(string abbreviation, string name, Func<T> creator, Func<T, bool> checker )
