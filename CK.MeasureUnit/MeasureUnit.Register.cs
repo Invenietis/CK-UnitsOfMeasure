@@ -102,7 +102,11 @@ namespace CK.Core
 
         static AliasMeasureUnit RegisterAlias( string a, string n, FullFactor f, MeasureUnit d )
         {
-            return Register( a, n, () => new AliasMeasureUnit( a, n, f, d ), m => m.DefinitionFactor == f && m.Definition == d );
+            return Register( abbreviation: a,
+                                name: n,
+                                creator: () => new AliasMeasureUnit( a, n, f, d ),
+                                checker: m => m.Definition.Normalization == d.Normalization
+                                                && m.NormalizationFactor == d.NormalizationFactor.Multiply( f ) );
         }
 
         internal static MeasureUnit RegisterCombined( ExponentMeasureUnit[] units )
