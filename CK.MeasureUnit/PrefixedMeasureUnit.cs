@@ -13,8 +13,8 @@ namespace CK.Core
     /// </summary>
     public sealed class PrefixedMeasureUnit : AtomicMeasureUnit
     {
-        internal PrefixedMeasureUnit( (string A, string N) names, ExpFactor adjusment, MeasureStandardPrefix p, AtomicMeasureUnit u, bool isNormalized )
-            : base( names.A, names.N, isNormalized )
+        internal PrefixedMeasureUnit( MeasureContext ctx, (string A, string N) names, ExpFactor adjusment, MeasureStandardPrefix p, AtomicMeasureUnit u, bool isNormalized )
+            : base( ctx, names.A, names.N, isNormalized )
         {
             Debug.Assert( p != MeasureStandardPrefix.None );
             AdjustmentFactor = adjusment;

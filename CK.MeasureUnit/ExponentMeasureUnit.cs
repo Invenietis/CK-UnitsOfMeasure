@@ -13,16 +13,16 @@ namespace CK.Core
     /// </summary>
     public class ExponentMeasureUnit : MeasureUnit, IComparable<ExponentMeasureUnit>
     {
-        internal ExponentMeasureUnit( (string A, string N) names, int exp, AtomicMeasureUnit u )
-            : base( names.A, names.N, u.IsNormalized )
+        internal ExponentMeasureUnit( MeasureContext ctx, (string A, string N) names, int exp, AtomicMeasureUnit u )
+            : base( ctx, names.A, names.N, u.IsNormalized )
         {
             Debug.Assert( exp != 0 );
             Exponent = exp;
             AtomicMeasureUnit = u;
         }
 
-        private protected ExponentMeasureUnit( string abbreviation, string name, bool isNormalized )
-            : base( abbreviation, name, isNormalized )
+        private protected ExponentMeasureUnit( MeasureContext ctx, string abbreviation, string name, bool isNormalized )
+            : base( ctx, abbreviation, name, isNormalized )
         {
             Exponent = 1;
             AtomicMeasureUnit = (AtomicMeasureUnit)this;

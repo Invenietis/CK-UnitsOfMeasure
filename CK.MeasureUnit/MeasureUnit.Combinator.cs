@@ -21,10 +21,13 @@ namespace CK.Core
 
             public void Add( IEnumerable<ExponentMeasureUnit> units )
             {
+                MeasureContext c = null;
                 foreach( var u in units )
                 {
-                    Debug.Assert( u != null );
+                    Debug.Assert( u != null && u.Context != null );
+                    if( c != u.Context && c != null ) throw new Exception( "Units' Context mismatch." );
                     if( u.AtomicMeasureUnit != None ) Add( u.AtomicMeasureUnit, u.Exponent );
+                    c = u.Context;
                 }
             }
 
@@ -42,31 +45,31 @@ namespace CK.Core
                 _normE.Add( exp );
             }
 
-            public MeasureUnit GetResult()
+            public MeasureUnit GetResult( MeasureContext ctx )
             {
                 int count = _normM.Count;
                 if( count == 0 ) return None;
                 if( count == 1 )
                 {
                     int exp = _normE[0];
-                    return exp != 0 ? RegisterExponent( exp, _normM[0] ) : None;
+                    return exp != 0 ? ctx.RegisterExponent( exp, _normM[0] ) : None;
                 }
                 var result = new List<ExponentMeasureUnit>( count );
                 for( int i = 0; i < count; ++i )
                 {
                     int exp = _normE[i];
-                    if( exp != 0 ) result.Add( RegisterExponent( exp, _normM[i] ) );
+                    if( exp != 0 ) result.Add( ctx.RegisterExponent( exp, _normM[i] ) );
                 }
                 count = result.Count;
                 if( count == 0 ) return None;
                 if( count == 1 ) return result[0];
                 result.Sort();
-                return RegisterCombined( result.ToArray() );
+                return ctx.RegisterCombined( result.ToArray() );
             }
 
-            public static MeasureUnit Create( IEnumerable<ExponentMeasureUnit> units )
+            public static MeasureUnit Create( MeasureContext ctx, IEnumerable<ExponentMeasureUnit> units )
             {
-                return new Combinator( units ).GetResult();
+                return new Combinator( units ).GetResult( ctx );
             }
         }
     }

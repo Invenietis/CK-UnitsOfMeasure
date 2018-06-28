@@ -13,10 +13,11 @@ namespace CK.Core
     public sealed class AliasMeasureUnit : AtomicMeasureUnit
     {
         internal AliasMeasureUnit(
+            MeasureContext ctx,
             string abbreviation, string name,
             FullFactor definitionFactor,
             MeasureUnit definition )
-            : base( abbreviation, name, false )
+            : base( ctx, abbreviation, name, false )
         {
             DefinitionFactor = definitionFactor;
             Definition = definition;

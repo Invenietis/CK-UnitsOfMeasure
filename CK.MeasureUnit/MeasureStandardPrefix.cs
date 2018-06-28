@@ -88,10 +88,10 @@ namespace CK.Core
                 var newExp = prefix.Factor.Multiply( p.Prefix.Factor ).Multiply( p.AdjustmentFactor );
                 if( newExp.IsNeutral ) return (ExpFactor.Neutral,p.AtomicMeasureUnit);
                 var best = FindBest( newExp );
-                if( !allowAdjustmentPrefix ) return (best.Adjustment, MeasureUnit.RegisterPrefixed( ExpFactor.Neutral, best.Prefix, p.AtomicMeasureUnit ));
-                return (ExpFactor.Neutral, MeasureUnit.RegisterPrefixed( best.Adjustment, best.Prefix, p.AtomicMeasureUnit ));
+                if( !allowAdjustmentPrefix ) return (best.Adjustment, u.Context.RegisterPrefixed( ExpFactor.Neutral, best.Prefix, p.AtomicMeasureUnit ));
+                return (ExpFactor.Neutral, u.Context.RegisterPrefixed( best.Adjustment, best.Prefix, p.AtomicMeasureUnit ));
             }
-            return (ExpFactor.Neutral, MeasureUnit.RegisterPrefixed( ExpFactor.Neutral, prefix, u ));
+            return (ExpFactor.Neutral, u.Context.RegisterPrefixed( ExpFactor.Neutral, prefix, u ));
         }
 
         static (ExpFactor Adjustment, MeasureStandardPrefix Prefix) FindBest( ExpFactor newExp )
