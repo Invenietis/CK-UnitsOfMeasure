@@ -1,32 +1,122 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 
 namespace CK.Core
 {
-    public struct Quantity
+    /// <summary>
+    /// Immutable struct that encapsulates a double <see cref="Value"/> and its <see cref="MeasureUnit"/>.
+    /// </summary>
+    public struct Quantity : IEquatable<Quantity>
     {
+        /// <summary>
+        /// The value.
+        /// </summary>
         public readonly double Value;
+
+        /// <summary>
+        /// The unit of measure of the <see cref="Value"/>.
+        /// </summary>
         public readonly MeasureUnit Unit;
 
-        public Quantity( double v, MeasureUnit u )
+        string _normalized;
+
+        /// <summary>
+        /// Initializes a new <see cref="Quantity"/>.
+        /// </summary>
+        /// <param name="v">Quantity value.</param>
+        /// <param name="unit">Unit of measure. Can not be null.</param>
+        public Quantity( double v, MeasureUnit unit )
         {
             Value = v;
-            Unit = u;
+            Unit = unit ?? throw new ArgumentNullException( nameof( unit ) );
+            _normalized = null;
         }
 
+        /// <summary>
+        /// Multiplies this quantity with another one.
+        /// This is always possible: the resulting quantity's unit will hold the combined unit.
+        /// </summary>
+        /// <param name="q">Quantity to multiply.</param>
+        /// <returns>The resulting quantity.</returns>
         public Quantity Multiply( Quantity q ) => new Quantity( Value * q.Value, Unit * q.Unit );
 
+
+        /// <summary>
+        /// Divides this quantity with another one.
+        /// This is always possible: the resulting quantity's unit will hold the combined unit.
+        /// </summary>
+        /// <param name="q">Quantity divisor.</param>
+        /// <returns>The resulting quantity.</returns>
         public Quantity DivideBy( Quantity q ) => new Quantity( Value / q.Value, Unit / q.Unit );
 
+        /// <summary>
+        /// Inverts this quantity.
+        /// The result' value is 1/<see cref="Value"/> and its <see cref="Unit"/> is <see cref="MeasureUnit.Invert"/>.
+        /// </summary>
+        /// <returns>The inverse quantity.</returns>
         public Quantity Invert() => new Quantity( 1.0 / Value, Unit.Invert() );
 
+        /// <summary>
+        /// Elevates this quantity to a given power.
+        /// </summary>
+        /// <param name="exp">The exponent.</param>
+        /// <returns>The resulting quantity.</returns>
         public Quantity Power( int exp ) => new Quantity( Math.Pow( Value, exp ), Unit.Power( exp ) );
 
+        /// <summary>
+        /// Checks whether another quantity can be added to this one.
+        /// The adqed quantity must be convertible (see <see cref="CanConvertTo"/>) into this <see cref="Unit"/>.
+        /// </summary>
+        /// <param name="q">The quantity that may be added to this quantity.</param>
+        /// <returns>True if <see cref="Add"/> can be called.</returns>
+        public bool CanAdd( Quantity q ) => q.CanConvertTo( Unit );
+
+        /// <summary>
+        /// Adds a given quantity to this one, returning a quantity with this <see cref="Unit"/>.
+        /// The quantity to add must be convertible into this <see cref="Unit"/> (<see cref="CanAdd"/> must be true)
+        /// otherwise an <see cref="ArgumentException"/> is thrown.
+        /// </summary>
+        /// <param name="q">The quantity to add.</param>
+        /// <returns>A quantity with this <see cref="Unit"/>.</returns>
+        public Quantity Add( Quantity q )
+        {
+            if( q.Unit == Unit ) return new Quantity( Value + q.Value, Unit );
+            var qC = q.ConvertTo( Unit );
+            return new Quantity( Value + qC.Value, Unit );
+        }
+
+        /// <summary>
+        /// Negates this quantity: it is the negated <see cref="Value"/> with the same <see cref="Unit"/>.
+        /// </summary>
+        /// <returns>The negated quantity.</returns>
+        public Quantity Negate() => new Quantity( -Value, Unit );
+
+        /// <summary>
+        /// Checks whether this quantity can be covert into a quantity with different <see cref="Unit"/>.
+        /// </summary>
+        /// <param name="u">The target unit.</param>
+        /// <returns>True if this quantity can be expressed in the target unit, false otherwise.</returns>
+        public bool CanConvertTo( MeasureUnit u ) => Unit == u
+                                                     || (Unit.Context == u.Context
+                                                         && (Unit.Normalization == u.Normalization
+                                                             || Unit.Normalization == u.Normalization.Invert() ));
+
+        /// <summary>
+        /// Converts this quantity from this <see cref="Unit"/> to another <see cref="MeasureUnit"/>.
+        /// Must be called only if <see cref="CanConvertTo(MeasureUnit)"/> returned true otherwise an <see cref="ArgumentException"/>
+        /// is thrown.
+        /// </summary>
+        /// <param name="u">The target unit of measure.</param>
+        /// <returns>The quantity exporessed with the target unit..</returns>
         public Quantity ConvertTo( MeasureUnit u )
         {
+            if( Unit == u ) return this;
             if( !CanConvertTo( u ) )
             {
+                if( u.Context != Unit.Context )
+                    throw new ArgumentException( $"Can not convert between units in different contexts ('{Unit}' to '{u}')." );
                 throw new ArgumentException( $"Can not convert from '{Unit}' to '{u}'." );
             }
             if( Unit.Normalization == u.Normalization )
@@ -41,15 +131,65 @@ namespace CK.Core
             }
         }
 
-        public bool CanConvertTo( MeasureUnit u ) => Unit.Normalization == u.Normalization || Unit.Normalization == u.Normalization.Invert();
-
         public static Quantity operator /( Quantity o1, Quantity o2 ) => o1.DivideBy( o2 );
         public static Quantity operator *( Quantity o1, Quantity o2 ) => o1.Multiply( o2 );
         public static Quantity operator ^( Quantity o, int exp ) => o.Power( exp );
+        public static Quantity operator /( Quantity o, double v ) => new Quantity( o.Value / v, o.Unit );
+        public static Quantity operator *( Quantity o, double v ) => new Quantity( o.Value * v, o.Unit );
+        public static Quantity operator /( double v, Quantity o ) => new Quantity( v / o.Value, o.Unit.Invert() );
+        public static Quantity operator *( double v, Quantity o ) => new Quantity( o.Value * v, o.Unit );
+        public static Quantity operator +( Quantity o1, Quantity o2 ) => o1.Add( o2 );
+        public static Quantity operator -( Quantity o ) => o.Negate();
+        public static Quantity operator -( Quantity o1, Quantity o2 ) => o1.Add( o2.Negate() );
+        public static bool operator ==( Quantity o1, Quantity o2 ) => o1.Equals( o2 );
+        public static bool operator !=( Quantity o1, Quantity o2 ) => !o1.Equals( o2 );
 
-        public string ToString( IFormatProvider formatProvider ) => Value.ToString( formatProvider ) + " " + Unit.ToString();
+        /// <summary>
+        /// Get this string representation of this <see cref="Value"/> with this <see cref="Unit"/>.
+        /// </summary>
+        /// <param name="provider">The format provider.</param>
+        /// <returns>A readable string.</returns>
+        public string ToString( IFormatProvider provider ) => Value.ToString( provider ) + " " + Unit.ToString();
 
+        /// <summary>
+        /// Overridden to return this string representation of this <see cref="Value"/> with this <see cref="Unit"/>.
+        /// </summary>
+        /// <returns>A readable string.</returns>
         public override string ToString() => $"{Value} {Unit}";
 
+        /// <summary>
+        /// Returns the string representation of this quantity in this <see cref="Unit"/>'s <see cref="MeasureUnit.Normalization"/>
+        /// unit and <see cref="CultureInfo.InvariantCulture"/>.
+        /// </summary>
+        /// <returns>A readable string.</returns>
+        public string ToNormalizedString()
+        {
+            if( _normalized == null )
+            {
+                _normalized = ConvertTo( Unit.Normalization ).ToString( CultureInfo.InvariantCulture );
+            }
+            return _normalized;
+        }
+
+        /// <summary>
+        /// Overridden to support Unit aware equality. See <see cref="Equals(Quantity)"/>.
+        /// </summary>
+        /// <param name="obj">The object to test.</param>
+        /// <returns>True if this quantity is the same as the one, false otherwise.</returns>
+        public override bool Equals( object obj ) => obj is Quantity q && Equals( q );
+
+        /// <summary>
+        /// Overridden to support Unit aware equality.
+        /// </summary>
+        /// <returns>The hash code to use for this quantity.</returns>
+        public override int GetHashCode() => ToNormalizedString().GetHashCode();
+
+        /// <summary>
+        /// Checks if this quantity is equal to another one: the other's value is first
+        /// converted into this <see cref="Unit"/>.
+        /// </summary>
+        /// <param name="other">The quantity that may be equal to this.</param>
+        /// <returns>True if this quantity is the same as the other one, false otherwise.</returns>
+        public bool Equals( Quantity other ) => ToNormalizedString() == other.ToNormalizedString();
     }
 }
