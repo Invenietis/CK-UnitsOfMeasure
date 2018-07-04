@@ -158,15 +158,18 @@ namespace CK.Core
         /// <param name="provider">The format provider.</param>
         /// <returns>A readable string.</returns>
         public string ToString( IFormatProvider provider ) => Value.ToString( provider )
-                                                            + (Unit != null && Unit != MeasureUnit.None
-                                                                ? " " + Unit.ToString()
-                                                                : String.Empty);
+                                                              + (Unit != null && Unit != MeasureUnit.None
+                                                                 ? " " + Unit.Abbreviation
+                                                                 : String.Empty);
 
         /// <summary>
         /// Overridden to return this string representation of this <see cref="Value"/> with this <see cref="Unit"/>.
         /// </summary>
         /// <returns>A readable string.</returns>
-        public override string ToString() => $"{Value} {Unit}";
+        public override string ToString() => Value.ToString()
+                                                + (Unit != null && Unit != MeasureUnit.None
+                                                    ? " " + Unit.Abbreviation
+                                                    : String.Empty);
 
         /// <summary>
         /// Returns the string representation of this quantity in this <see cref="Unit"/>'s <see cref="MeasureUnit.Normalization"/>
