@@ -14,14 +14,7 @@ namespace CK.Core
         public MeasureContext()
         {
             _allUnits = new ConcurrentDictionary<string, MeasureUnit>();
-            None = new FundamentalMeasureUnit( this, "", "None", true );
-            _allUnits.GetOrAdd( None.Abbreviation, None );
         }
-
-        /// <summary>
-        /// Dimensionles unit. Associated abbreviation is "" (the empty string) and its name is "None".
-        /// </summary>
-        public readonly FundamentalMeasureUnit None;
 
         /// <summary>
         /// Gets a <see cref="MeasureUnit"/> from its abbreviation or null if it has not been registered.

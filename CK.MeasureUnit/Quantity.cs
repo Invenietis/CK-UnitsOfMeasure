@@ -17,6 +17,8 @@ namespace CK.Core
 
         /// <summary>
         /// The unit of measure of the <see cref="Value"/>.
+        /// When this value has been initialized by the struct default constructor, this is null.
+        /// The null MeasureUnit is logically the same as the <see cref="MeasureUnit.None"/>.
         /// </summary>
         public readonly MeasureUnit Unit;
 
@@ -26,11 +28,11 @@ namespace CK.Core
         /// Initializes a new <see cref="Quantity"/>.
         /// </summary>
         /// <param name="v">Quantity value.</param>
-        /// <param name="unit">Unit of measure. Can not be null.</param>
+        /// <param name="unit">Unit of measure. Can be null (<see cref="MeasureUnit.None"/> is used).</param>
         public Quantity( double v, MeasureUnit unit )
         {
             Value = v;
-            Unit = unit ?? throw new ArgumentNullException( nameof( unit ) );
+            Unit = unit ?? MeasureUnit.None;
             _normalized = null;
         }
 
@@ -56,14 +58,14 @@ namespace CK.Core
         /// The result' value is 1/<see cref="Value"/> and its <see cref="Unit"/> is <see cref="MeasureUnit.Invert"/>.
         /// </summary>
         /// <returns>The inverse quantity.</returns>
-        public Quantity Invert() => new Quantity( 1.0 / Value, Unit.Invert() );
+        public Quantity Invert() => new Quantity( 1.0 / Value, Unit.NullSafe().Invert() );
 
         /// <summary>
         /// Elevates this quantity to a given power.
         /// </summary>
         /// <param name="exp">The exponent.</param>
         /// <returns>The resulting quantity.</returns>
-        public Quantity Power( int exp ) => new Quantity( Math.Pow( Value, exp ), Unit.Power( exp ) );
+        public Quantity Power( int exp ) => new Quantity( Math.Pow( Value, exp ), Unit.NullSafe().Power( exp ) );
 
         /// <summary>
         /// Checks whether another quantity can be added to this one.
@@ -94,14 +96,19 @@ namespace CK.Core
         public Quantity Negate() => new Quantity( -Value, Unit );
 
         /// <summary>
-        /// Checks whether this quantity can be covert into a quantity with different <see cref="Unit"/>.
+        /// Checks whether this quantity can be converted into a quantity with a different <see cref="Unit"/>.
         /// </summary>
         /// <param name="u">The target unit.</param>
         /// <returns>True if this quantity can be expressed in the target unit, false otherwise.</returns>
-        public bool CanConvertTo( MeasureUnit u ) => Unit == u
-                                                     || (Unit.Context == u.Context
-                                                         && (Unit.Normalization == u.Normalization
-                                                             || Unit.Normalization == u.Normalization.Invert() ));
+        public bool CanConvertTo( MeasureUnit u )
+        {
+            var x = Unit.NullSafe();
+            var y = u.NullSafe();
+            return x == y
+                   || (x.Context == y.Context
+                       && (x.Normalization == y.Normalization
+                           || x.Normalization == y.Normalization.Invert()));
+        }
 
         /// <summary>
         /// Converts this quantity from this <see cref="Unit"/> to another <see cref="MeasureUnit"/>.
@@ -119,6 +126,7 @@ namespace CK.Core
                     throw new ArgumentException( $"Can not convert between units in different contexts ('{Unit}' to '{u}')." );
                 throw new ArgumentException( $"Can not convert from '{Unit}' to '{u}'." );
             }
+            if( Unit == null ) return new Quantity( 0.0, MeasureUnit.None );
             if( Unit.Normalization == u.Normalization )
             {
                 FullFactor ratio = Unit.NormalizationFactor.DivideBy( u.NormalizationFactor );
@@ -149,7 +157,10 @@ namespace CK.Core
         /// </summary>
         /// <param name="provider">The format provider.</param>
         /// <returns>A readable string.</returns>
-        public string ToString( IFormatProvider provider ) => Value.ToString( provider ) + " " + Unit.ToString();
+        public string ToString( IFormatProvider provider ) => Value.ToString( provider )
+                                                            + (Unit != null && Unit != MeasureUnit.None
+                                                                ? " " + Unit.ToString()
+                                                                : String.Empty);
 
         /// <summary>
         /// Overridden to return this string representation of this <see cref="Value"/> with this <see cref="Unit"/>.
@@ -166,7 +177,7 @@ namespace CK.Core
         {
             if( _normalized == null )
             {
-                _normalized = ConvertTo( Unit.Normalization ).ToString( CultureInfo.InvariantCulture );
+                _normalized = Unit == null ? "0" : ConvertTo( Unit.Normalization ).ToString( CultureInfo.InvariantCulture );
             }
             return _normalized;
         }

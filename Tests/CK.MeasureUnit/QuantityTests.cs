@@ -111,7 +111,6 @@ namespace CK.Core.Tests
 
         }
 
-
         [Test]
         public void Quantity_with_alias_and_prefixed_units()
         {
@@ -135,6 +134,30 @@ namespace CK.Core.Tests
             dm101.GetHashCode().Should().Be( dam1Dot01.GetHashCode() );
         }
 
-    }
+        [Test]
+        public void Quantity_kindly_handle_the_default_quantity_with_null_Unit()
+        {
+            var qDef = new Quantity();
 
+            qDef.ToNormalizedString().Should().Be( "0" );
+
+            var kilo = 1.WithUnit( MeasureUnit.Kilogram );
+            qDef.CanConvertTo( kilo.Unit ).Should().BeFalse();
+            qDef.CanConvertTo( MeasureUnit.None ).Should().BeTrue();
+            qDef.CanAdd( kilo ).Should().BeFalse();
+            kilo.CanAdd( qDef ).Should().BeFalse();
+
+            var zeroKilo = qDef.Multiply( kilo );
+            zeroKilo.ToNormalizedString().Should().Be( "0 kg" );
+
+            (qDef * kilo).ToNormalizedString().Should().Be( "0 kg" );
+            (kilo * qDef).ToNormalizedString().Should().Be( "0 kg" );
+            (kilo.Multiply( qDef)).ToNormalizedString().Should().Be( "0 kg" );
+            (qDef / kilo).ToNormalizedString().Should().Be( "0 kg-1" );
+
+            var qDef2 = qDef.ConvertTo( MeasureUnit.None );
+            qDef2.ToNormalizedString().Should().Be( "0" );
+        }
+
+    }
 }

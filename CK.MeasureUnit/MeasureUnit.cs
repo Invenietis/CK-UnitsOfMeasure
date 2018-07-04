@@ -38,13 +38,15 @@ namespace CK.Core
             {
                 _normalizationFactor = FullFactor.Neutral;
                 _normalization = this;
+                if( ctx == null ) _invert = this;
             }
         }
 
         internal MeasureUnit( MeasureContext ctx, (string A, string N) names, ExponentMeasureUnit[] units )
         {
-            _ctx = ctx;
+            Debug.Assert( ctx != null );
             Debug.Assert( !units.Any( u => u.AtomicMeasureUnit == None ) );
+            _ctx = ctx;
             Abbreviation = names.A;
             Name = names.N;
             _units = units;
@@ -62,6 +64,7 @@ namespace CK.Core
 
         /// <summary>
         /// Gets the abbreviation that identifies this measure.
+        /// It is null if and only if this is the <see cref="None"/> unit.
         /// </summary>
         public string Abbreviation { get; }
 
@@ -72,11 +75,12 @@ namespace CK.Core
 
         /// <summary>
         /// Gets the one or more <see cref="ExponentMeasureUnit"/> that define this measure.
+        /// All <see cref="AtomicMeasureUnit"/> are defined by themselves.
         /// </summary>
         public IReadOnlyList<ExponentMeasureUnit> MeasureUnits => _units;
 
         /// <summary>
-        /// Gets whether this <see cref="MeasureUnits"/> only contains <see cref="FundamentalMeasureUnit"/>.
+        /// Gets whether this <see cref="MeasureUnits"/> only contains normalized units.
         /// </summary>
         public bool IsNormalized => _normalization == this;
 
@@ -128,30 +132,39 @@ namespace CK.Core
         /// </summary>
         /// <param name="m">Other units to multiply.</param>
         /// <returns>The result of the multiplication.</returns>
-        public MeasureUnit Multiply( MeasureUnit m ) => Combinator.Create( _ctx, MeasureUnits.Concat( m.MeasureUnits ) );
+        public MeasureUnit Multiply( MeasureUnit m ) => _ctx == null
+                                                        ? m.NullSafe()
+                                                        : (m == null || m == None
+                                                            ? this
+                                                            :Combinator.Create( _ctx, MeasureUnits.Concat( m.MeasureUnits ) ));
 
         /// <summary>
         /// Returns the <see cref="MeasureUnit"/> that results from this one divided by another one.
         /// </summary>
         /// <param name="m">The divisor.</param>
         /// <returns>The result of the division.</returns>
-        public MeasureUnit DivideBy( MeasureUnit m ) => Combinator.Create( _ctx, MeasureUnits.Concat( m.Invert().MeasureUnits ) );
+        public MeasureUnit DivideBy( MeasureUnit m ) => _ctx == null
+                                                        ? m.NullSafe().Invert()
+                                                        : m == null || m == None
+                                                            ? this
+                                                            : Combinator.Create( _ctx, MeasureUnits.Concat( m.Invert().MeasureUnits ) );
 
         /// <summary>
         /// Returns this measure of units elevated to a given power.
-        /// Note that when <paramref name="exp"/> is 0, <see cref="MeasureUnit.None"/> is returned.
+        /// Note that when <paramref name="exp"/> is 0, <see cref="None"/> is returned.
         /// </summary>
         /// <param name="exp">The exponent.</param>
         /// <returns>The resulting normalized units.</returns>
         public MeasureUnit Power( int exp )
         {
-            if( exp == 0 ) return None;
+            if( exp == 0 || _ctx == null ) return None;
             if( exp == 1 ) return this;
             if( exp == -1 ) return Invert();
             Combinator c = new Combinator( null );
             foreach( var m in MeasureUnits )
             {
-                if( m.AtomicMeasureUnit != None ) c.Add( m.AtomicMeasureUnit, m.Exponent * exp );
+                Debug.Assert( m != None );
+                c.Add( m.AtomicMeasureUnit, m.Exponent * exp );
             }
             return c.GetResult( _ctx );
         }
@@ -220,9 +233,19 @@ namespace CK.Core
             return StandardMeasureContext.Default.DefineFundamental( abbreviation, name, normalizedPrefix );
         }
 
-        public static MeasureUnit operator /( MeasureUnit o1, MeasureUnit o2 ) => o1.DivideBy( o2 );
-        public static MeasureUnit operator *( MeasureUnit o1, MeasureUnit o2 ) => o1.Multiply( o2 );
-        public static MeasureUnit operator ^( MeasureUnit o, int exp ) => o.Power( exp );
+        public static MeasureUnit operator /( MeasureUnit o1, MeasureUnit o2 ) => o1.NullSafe().DivideBy( o2 );
+        public static MeasureUnit operator *( MeasureUnit o1, MeasureUnit o2 ) => o1.NullSafe().Multiply( o2 );
+        public static MeasureUnit operator ^( MeasureUnit o, int exp ) => o.NullSafe().Power( exp );
+
+        //public static bool operator ==( MeasureUnit o1, MeasureUnit o2 ) => ReferenceEquals( o1, o2 )
+        //                                                                    || (ReferenceEquals( o1, null ) && ReferenceEquals( o2, None ))
+        //                                                                    || (ReferenceEquals( o1, None ) && ReferenceEquals( o2, null ));
+
+        //public static bool operator !=( MeasureUnit o1, MeasureUnit o2 ) => !(o1 == o2);
+
+        //public override bool Equals( object obj ) => ReferenceEquals( this, obj ) || (_ctx == null && ReferenceEquals( obj, null ) );
+
+        //public override int GetHashCode() => _ctx == null ? 0 : base.GetHashCode();
 
         /// <summary>
         /// Returns the abbreviation optionally suffixed with its " (<see cref="Name"/>)".

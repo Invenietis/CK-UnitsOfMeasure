@@ -24,9 +24,9 @@ namespace CK.Core
                 MeasureContext c = null;
                 foreach( var u in units )
                 {
-                    Debug.Assert( u != null && u.Context != null );
+                    Debug.Assert( u != null && u != None && u.AtomicMeasureUnit != None );
                     if( c != u.Context && c != null ) throw new Exception( "Units' Context mismatch." );
-                    if( u.AtomicMeasureUnit != None ) Add( u.AtomicMeasureUnit, u.Exponent );
+                    Add( u.AtomicMeasureUnit, u.Exponent );
                     c = u.Context;
                 }
             }

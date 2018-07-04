@@ -6,6 +6,7 @@ namespace CK.Core
 {
     public static class MeasureUnitExtension
     {
+        public static MeasureUnit NullSafe( this MeasureUnit @this ) => @this == null ? MeasureUnit.None : @this;
 
         public static Quantity WithUnit( this int @this, MeasureUnit u ) => new Quantity( @this, u );
 
