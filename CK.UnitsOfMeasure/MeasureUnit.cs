@@ -7,7 +7,7 @@ using System.Collections.Concurrent;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
 
-namespace CK.Core
+namespace CK.UnitsOfMeasure
 {
     /// <summary>
     /// The base class for all measure unit also handles the combination of multiples <see cref="MeasureUnit"/>.

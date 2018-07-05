@@ -5,7 +5,7 @@ using System.Text;
 using System.IO;
 using System.Diagnostics;
 
-namespace CK.Core
+namespace CK.UnitsOfMeasure
 {
     /// <summary>
     /// A <see cref="MeasureStandardPrefix"/> applied to a <see cref="Core.AtomicMeasureUnit"/>. 

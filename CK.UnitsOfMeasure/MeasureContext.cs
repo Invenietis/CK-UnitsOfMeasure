@@ -5,7 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
-namespace CK.Core
+namespace CK.UnitsOfMeasure
 {
     public class MeasureContext
     {

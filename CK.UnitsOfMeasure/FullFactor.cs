@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace CK.Core
+namespace CK.UnitsOfMeasure
 {
     /// <summary>
     /// Immutable struct that captures 2^<see cref="Exp2"/>.10^<see cref="Exp10"/>.

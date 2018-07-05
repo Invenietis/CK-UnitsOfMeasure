@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace CK.Core
+namespace CK.UnitsOfMeasure
 {
     public static class MeasureUnitExtension
     {

@@ -15,7 +15,7 @@
     On appveyor, the clone folder MUST be set to the solution path in the CK-World.
     For this solution, it is:
 
-    clone_folder: C:\CK-World\CK-Core-Projects\CK-MeasureUnit
+    clone_folder: C:\CK-World\CK-Core-Projects\CK-UnitsOfMeasure
 
     This must be adapted for each solution/repository.
     -->
@@ -44,16 +44,16 @@
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
 
     <!-- Invenietis standard properties. -->
-    <Copyright>Copyright Invenietis 2007-$([System.DateTime]::UtcNow.ToString("yyyy"))</Copyright>
-    <Company>Invenietis</Company>
-    <Authors>Invenietis</Authors>
+    <Copyright>Copyright Invenietis 2018-$([System.DateTime]::UtcNow.ToString("yyyy"))</Copyright>
+    <Company>Signature-Code</Company>
+    <Authors>Signature-Code</Authors>
 
     <!-- Properties that are solution depdendents. -->
     <ProductName>CK-Framework</ProductName>
-    <PackageReleaseNotes>https://github.com/Invenietis/ck-core/releases</PackageReleaseNotes>
-    <PackageLicenseUrl>https://opensource.org/licenses/LGPL-3.0</PackageLicenseUrl>
+    <PackageReleaseNotes>https://github.com/Invenietis/CK-UnitsOfMeasure/releases</PackageReleaseNotes>
+    <PackageLicenseUrl>https://opensource.org/licenses/MIT</PackageLicenseUrl>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/Invenietis/ck-core</RepositoryUrl>
+    <RepositoryUrl>https://github.com/Invenietis/CK-UnitsOfMeasure</RepositoryUrl>
     
   </PropertyGroup>
 </Project>

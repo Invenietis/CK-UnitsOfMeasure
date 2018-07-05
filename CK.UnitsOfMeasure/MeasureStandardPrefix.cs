@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
-namespace CK.Core
+namespace CK.UnitsOfMeasure
 {
     /// <summary>
     /// Represents a standard prefix like "Kilo" (abbrev. "k") or "Mega" (abbrev. "M")

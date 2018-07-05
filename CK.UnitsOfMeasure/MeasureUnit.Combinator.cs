@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 
-namespace CK.Core
+namespace CK.UnitsOfMeasure
 {
     public partial class MeasureUnit
     {

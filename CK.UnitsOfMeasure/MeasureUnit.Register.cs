@@ -7,7 +7,7 @@ using System.Collections.Concurrent;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
 
-namespace CK.Core
+namespace CK.UnitsOfMeasure
 {
     public partial class MeasureUnit
     {

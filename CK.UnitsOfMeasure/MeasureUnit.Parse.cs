@@ -6,7 +6,7 @@ using System.IO;
 using System.Collections.Concurrent;
 using System.Text.RegularExpressions;
 
-namespace CK.Core
+namespace CK.UnitsOfMeasure
 {
     public partial class MeasureUnit
     {

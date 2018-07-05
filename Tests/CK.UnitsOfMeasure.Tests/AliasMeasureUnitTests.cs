@@ -1,13 +1,9 @@
 using FluentAssertions;
 using NUnit.Framework;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static CK.Core.MeasureUnit;
+using static CK.UnitsOfMeasure.MeasureUnit;
 
-namespace CK.Core.Tests
+namespace CK.UnitsOfMeasure.Tests
 {
     [TestFixture]
     public class AliasMeasureUnitTests

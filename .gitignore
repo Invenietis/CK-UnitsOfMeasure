@@ -233,11 +233,5 @@ _Pvt_Extensions
 
 # FAKE - F# Make
 .fake/
-SGVVersionInfo.cs
-Tests/CK.Core.Tests/TestDir/
-Tests/CK.ActivityMonitor.Tests/TestFolder/CriticalErrors/
-Tests/CK.Monitoring.Tests/TestFolder/
-CodeCakeBuilder/Tools/nuget.exe
-SGVVersionInfo.cs
-Tests/CK.Core.NetCore.Tests/TestDir/
-TestResult.*.xml
+
+TestResult*.xml

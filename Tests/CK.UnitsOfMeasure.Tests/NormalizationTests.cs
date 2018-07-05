@@ -2,7 +2,7 @@ using FluentAssertions;
 using System;
 using NUnit.Framework;
 
-namespace CK.Core.Tests
+namespace CK.UnitsOfMeasure.Tests
 {
 
     [TestFixture]

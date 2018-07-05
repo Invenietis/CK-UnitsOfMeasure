@@ -5,12 +5,14 @@
     <LangVersion>7.3</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\CK.MeasureUnit\CK.MeasureUnit.csproj" />
     <PackageReference Include="FluentAssertions" Version="5.4.1" />
     <PackageReference Include="NUnit" Version="[2.6.4]" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\CK.UnitsOfMeasure\CK.UnitsOfMeasure.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />

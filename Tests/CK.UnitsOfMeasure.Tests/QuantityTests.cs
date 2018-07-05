@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CK.Core.Tests
+namespace CK.UnitsOfMeasure.Tests
 {
     [TestFixture]
     public class QuantityTests

@@ -17,9 +17,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeCakeBuilder", "CodeCakeBuilder\CodeCakeBuilder.csproj", "{C495D3DF-2E63-466B-9886-DE8A3EFBD584}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CK.MeasureUnit", "CK.MeasureUnit\CK.MeasureUnit.csproj", "{2691B430-5916-478D-9BD3-63E32C9CB43C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CK.UnitsOfMeasure", "CK.UnitsOfMeasure\CK.UnitsOfMeasure.csproj", "{2691B430-5916-478D-9BD3-63E32C9CB43C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CK.MeasureUnit.Tests", "Tests\CK.MeasureUnit\CK.MeasureUnit.Tests.csproj", "{E48BFE5D-985C-43D9-8990-A5836F1E074E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CK.UnitsOfMeasure.Tests", "Tests\CK.UnitsOfMeasure.Tests\CK.UnitsOfMeasure.Tests.csproj", "{E48BFE5D-985C-43D9-8990-A5836F1E074E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

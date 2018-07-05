@@ -5,7 +5,7 @@ using System.Text;
 using System.IO;
 using System.Collections.Concurrent;
 
-namespace CK.Core
+namespace CK.UnitsOfMeasure
 {
 
     /// <summary>

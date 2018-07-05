@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 
-namespace CK.Core
+namespace CK.UnitsOfMeasure
 {
     /// <summary>
     /// Immutable struct that encapsulates a double <see cref="Value"/> and its <see cref="MeasureUnit"/>.
