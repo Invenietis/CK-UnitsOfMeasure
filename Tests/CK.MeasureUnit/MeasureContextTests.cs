@@ -17,7 +17,7 @@ namespace CK.Core.Tests
             var kilogram = MeasureUnit.Kilogram;
             kilogram.Should().BeSameAs( StandardMeasureContext.Default.Kilogram );
 
-            var another = new StandardMeasureContext();
+            var another = new StandardMeasureContext( "Another" );
             var anotherKilogram = another.Kilogram;
             anotherKilogram.Should().NotBeSameAs( kilogram );
 

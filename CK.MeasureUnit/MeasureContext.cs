@@ -11,10 +11,25 @@ namespace CK.Core
     {
         readonly ConcurrentDictionary<string, MeasureUnit> _allUnits;
 
-        public MeasureContext()
+        internal MeasureContext(string name, bool isDefault)
         {
             _allUnits = new ConcurrentDictionary<string, MeasureUnit>();
+            if( !isDefault )
+            {
+                if( String.IsNullOrWhiteSpace( name ) ) throw new ArgumentException( "Must not be null or empty.", nameof( name ) );
+            }
+            Name = name;
         }
+
+        public MeasureContext( string name )
+            : this( name, false )
+        {
+        }
+
+        /// <summary>
+        /// Gets the name of this context.
+        /// </summary>
+        public string Name { get; }
 
         /// <summary>
         /// Gets a <see cref="MeasureUnit"/> from its abbreviation or null if it has not been registered.
@@ -81,7 +96,7 @@ namespace CK.Core
                 return RegisterFundamental( abbreviation, name, true );
             }
             var f = RegisterFundamental( abbreviation, name, false );
-            RegisterPrefixed( ExpFactor.Neutral, normalizedPrefix, f, true );
+            f.SetPrefixedNormalization( RegisterPrefixed( ExpFactor.Neutral, normalizedPrefix, f, true ) );
             return f;
         }
 

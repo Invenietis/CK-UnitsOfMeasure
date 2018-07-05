@@ -19,32 +19,6 @@ namespace CK.Core.Tests
 
             var noneInv = MeasureUnit.None.Invert();
             noneInv.Should().BeSameAs( MeasureUnit.None );
-
-        }
-
-        [Test]
-        public void handling_null_MeasureUnit_as_None()
-        {
-            MeasureUnit theNull = null;
-
-            var kiloM1 = theNull / MeasureUnit.Kilogram;
-            kiloM1.Abbreviation.Should().Be( "kg-1" );
-
-            var kiloM1Bis = kiloM1 / theNull;
-            kiloM1Bis.Should().BeSameAs( kiloM1 );
-
-            (theNull * kiloM1).Should().BeSameAs( kiloM1 );
-            (kiloM1 * theNull * theNull * theNull).Should().BeSameAs( kiloM1 );
-
-            var none = theNull / theNull;
-            none.Should().BeSameAs( MeasureUnit.None );
-
-            var none2 = theNull * theNull;
-            none2.Should().BeSameAs( MeasureUnit.None );
-
-            //(MeasureUnit.None == null).Should().BeTrue();
-            //(null == MeasureUnit.None).Should().BeTrue();
-            //(MeasureUnit.None.Equals( null )).Should().BeTrue();
         }
 
         [Test]

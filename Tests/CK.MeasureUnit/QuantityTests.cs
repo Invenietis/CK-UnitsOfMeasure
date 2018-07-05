@@ -112,7 +112,7 @@ namespace CK.Core.Tests
         }
 
         [Test]
-        public void Quantity_with_alias_and_prefixed_units()
+        public void Quantity_with_alias_and_prefixed_units_with_metre()
         {
             var metre = MeasureUnit.Metre;
             var decametre = MeasureStandardPrefix.Deca[metre];
@@ -135,15 +135,39 @@ namespace CK.Core.Tests
         }
 
         [Test]
+        public void Quantity_with_alias_and_prefixed_units_with_gram()
+        {
+            var gram = MeasureUnit.Gram;
+            var decagram = MeasureStandardPrefix.Deca[gram];
+            var decigram = MeasureStandardPrefix.Deci[gram];
+
+            var dg1 = 1.WithUnit( decigram );
+            var dag1 = 1.WithUnit( decagram );
+            var dg101 = dg1 + dag1;
+            var dag1Dot01 = dag1 + dg1;
+
+            dg101.ToString( CultureInfo.InvariantCulture ).Should().Be( "101 dg" );
+            dag1Dot01.ToString( CultureInfo.InvariantCulture ).Should().Be( "1.01 dag" );
+
+            dg101.Equals( dag1Dot01 ).Should().BeTrue();
+            dag1Dot01.Equals( dg101 ).Should().BeTrue();
+            dg101.ConvertTo( gram ).ToString( CultureInfo.InvariantCulture ).Should().Be( "10.1 g" );
+            dag1Dot01.ConvertTo( gram ).ToString( CultureInfo.InvariantCulture ).Should().Be( "10.1 g" );
+
+            dg101.GetHashCode().Should().Be( dag1Dot01.GetHashCode() );
+            dg101.ToNormalizedString().Should().Be( "0.0101 kg" );
+        }
+
+        [Test]
         public void Quantity_kindly_handle_the_default_quantity_with_null_Unit()
         {
             var qDef = new Quantity();
 
             qDef.ToNormalizedString().Should().Be( "0" );
+            qDef.CanConvertTo( MeasureUnit.None ).Should().BeTrue();
 
             var kilo = 1.WithUnit( MeasureUnit.Kilogram );
             qDef.CanConvertTo( kilo.Unit ).Should().BeFalse();
-            qDef.CanConvertTo( MeasureUnit.None ).Should().BeTrue();
             qDef.CanAdd( kilo ).Should().BeFalse();
             kilo.CanAdd( qDef ).Should().BeFalse();
 
@@ -152,12 +176,34 @@ namespace CK.Core.Tests
 
             (qDef * kilo).ToNormalizedString().Should().Be( "0 kg" );
             (kilo * qDef).ToNormalizedString().Should().Be( "0 kg" );
-            (kilo.Multiply( qDef)).ToNormalizedString().Should().Be( "0 kg" );
+            (kilo.Multiply( qDef )).ToNormalizedString().Should().Be( "0 kg" );
             (qDef / kilo).ToNormalizedString().Should().Be( "0 kg-1" );
 
             var qDef2 = qDef.ConvertTo( MeasureUnit.None );
             qDef2.ToNormalizedString().Should().Be( "0" );
         }
 
+        [Test]
+        public void Quantity_comparison()
+        {
+            var r0 = new Quantity();
+            var rM1 = -1.WithUnit( MeasureUnit.None );
+            var r2 = 2.WithUnit( MeasureUnit.None );
+            var qG1 = 1.WithUnit( MeasureUnit.Gram );
+            var qG2 = 2.WithUnit( MeasureUnit.Gram );
+            var qM1 = 1.WithUnit( MeasureUnit.Metre );
+            var qM2 = 2.WithUnit( MeasureUnit.Metre );
+
+            var cA = new StandardMeasureContext( "A" );
+            var cB = new StandardMeasureContext( "B" );
+
+            var q2CA = 3.WithUnit( cA.Gram );
+            var q1CB = -1.WithUnit( cB.Gram );
+
+            var l = new[] { q2CA, q1CB, qM2, qM1, qG1, r0, qG2, r2, rM1 };
+            Array.Sort( l );
+            String.Join( ", ", l.Select( e => $"{e} ({(e.Unit.Context == null ? "*" : e.Unit.Context.Name)})" ) )
+                .Should().Be( "-1 (*), 0 (*), 2 (*), 1 g (), 2 g (), 1 m (), 2 m (), 3 g (A), -1 g (B)" );
+        }
     }
 }

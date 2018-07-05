@@ -8,8 +8,10 @@ namespace CK.Core
     /// <summary>
     /// Immutable struct that encapsulates a double <see cref="Value"/> and its <see cref="MeasureUnit"/>.
     /// </summary>
-    public struct Quantity : IEquatable<Quantity>
+    public struct Quantity : IEquatable<Quantity>, IComparable<Quantity>
     {
+        readonly MeasureUnit _unit;
+
         /// <summary>
         /// The value.
         /// </summary>
@@ -17,10 +19,9 @@ namespace CK.Core
 
         /// <summary>
         /// The unit of measure of the <see cref="Value"/>.
-        /// When this value has been initialized by the struct default constructor, this is null.
-        /// The null MeasureUnit is logically the same as the <see cref="MeasureUnit.None"/>.
+        /// Never null.
         /// </summary>
-        public readonly MeasureUnit Unit;
+        public MeasureUnit Unit => _unit ?? MeasureUnit.None;
 
         string _normalized;
 
@@ -32,7 +33,7 @@ namespace CK.Core
         public Quantity( double v, MeasureUnit unit )
         {
             Value = v;
-            Unit = unit ?? MeasureUnit.None;
+            _unit = unit ?? MeasureUnit.None;
             _normalized = null;
         }
 
@@ -58,14 +59,14 @@ namespace CK.Core
         /// The result' value is 1/<see cref="Value"/> and its <see cref="Unit"/> is <see cref="MeasureUnit.Invert"/>.
         /// </summary>
         /// <returns>The inverse quantity.</returns>
-        public Quantity Invert() => new Quantity( 1.0 / Value, Unit.NullSafe().Invert() );
+        public Quantity Invert() => new Quantity( 1.0 / Value, Unit.Invert() );
 
         /// <summary>
         /// Elevates this quantity to a given power.
         /// </summary>
         /// <param name="exp">The exponent.</param>
         /// <returns>The resulting quantity.</returns>
-        public Quantity Power( int exp ) => new Quantity( Math.Pow( Value, exp ), Unit.NullSafe().Power( exp ) );
+        public Quantity Power( int exp ) => new Quantity( Math.Pow( Value, exp ), Unit.Power( exp ) );
 
         /// <summary>
         /// Checks whether another quantity can be added to this one.
@@ -102,12 +103,11 @@ namespace CK.Core
         /// <returns>True if this quantity can be expressed in the target unit, false otherwise.</returns>
         public bool CanConvertTo( MeasureUnit u )
         {
-            var x = Unit.NullSafe();
-            var y = u.NullSafe();
-            return x == y
-                   || (x.Context == y.Context
-                       && (x.Normalization == y.Normalization
-                           || x.Normalization == y.Normalization.Invert()));
+            var o = Unit;
+            return o == u
+                   || (o.Context == u.Context
+                       && (o.Normalization == u.Normalization
+                           || o.Normalization == u.Normalization.Invert()));
         }
 
         /// <summary>
@@ -116,7 +116,7 @@ namespace CK.Core
         /// is thrown.
         /// </summary>
         /// <param name="u">The target unit of measure.</param>
-        /// <returns>The quantity exporessed with the target unit..</returns>
+        /// <returns>The quantity exporessed with the target unit.</returns>
         public Quantity ConvertTo( MeasureUnit u )
         {
             if( Unit == u ) return this;
@@ -126,7 +126,6 @@ namespace CK.Core
                     throw new ArgumentException( $"Can not convert between units in different contexts ('{Unit}' to '{u}')." );
                 throw new ArgumentException( $"Can not convert from '{Unit}' to '{u}'." );
             }
-            if( Unit == null ) return new Quantity( 0.0, MeasureUnit.None );
             if( Unit.Normalization == u.Normalization )
             {
                 FullFactor ratio = Unit.NormalizationFactor.DivideBy( u.NormalizationFactor );
@@ -151,6 +150,10 @@ namespace CK.Core
         public static Quantity operator -( Quantity o1, Quantity o2 ) => o1.Add( o2.Negate() );
         public static bool operator ==( Quantity o1, Quantity o2 ) => o1.Equals( o2 );
         public static bool operator !=( Quantity o1, Quantity o2 ) => !o1.Equals( o2 );
+        public static bool operator >( Quantity o1, Quantity o2 ) => o1.CompareTo( o2 ) > 0;
+        public static bool operator <( Quantity o1, Quantity o2 ) => o1.CompareTo( o2 ) < 0;
+        public static bool operator >=( Quantity o1, Quantity o2 ) => o1.CompareTo( o2 ) >= 0;
+        public static bool operator <=( Quantity o1, Quantity o2 ) => o1.CompareTo( o2 ) <= 0;
 
         /// <summary>
         /// Get this string representation of this <see cref="Value"/> with this <see cref="Unit"/>.
@@ -158,7 +161,7 @@ namespace CK.Core
         /// <param name="provider">The format provider.</param>
         /// <returns>A readable string.</returns>
         public string ToString( IFormatProvider provider ) => Value.ToString( provider )
-                                                              + (Unit != null && Unit != MeasureUnit.None
+                                                              + (Unit != MeasureUnit.None
                                                                  ? " " + Unit.Abbreviation
                                                                  : String.Empty);
 
@@ -167,7 +170,7 @@ namespace CK.Core
         /// </summary>
         /// <returns>A readable string.</returns>
         public override string ToString() => Value.ToString()
-                                                + (Unit != null && Unit != MeasureUnit.None
+                                                + (Unit != MeasureUnit.None
                                                     ? " " + Unit.Abbreviation
                                                     : String.Empty);
 
@@ -196,14 +199,59 @@ namespace CK.Core
         /// Overridden to support Unit aware equality.
         /// </summary>
         /// <returns>The hash code to use for this quantity.</returns>
-        public override int GetHashCode() => ToNormalizedString().GetHashCode();
+        public override int GetHashCode() => Unit.Normalization.GetHashCode() ^ ToNormalizedString().GetHashCode();
 
         /// <summary>
-        /// Checks if this quantity is equal to another one: the other's value is first
-        /// converted into this <see cref="Unit"/>.
+        /// Checks if this quantity is equal to another one: its <see cref="ToNormalizedString"/>
+        /// is the same as the other quantity (and they belong to the same <see cref="MeasureContext"/>).
         /// </summary>
         /// <param name="other">The quantity that may be equal to this.</param>
         /// <returns>True if this quantity is the same as the other one, false otherwise.</returns>
-        public bool Equals( Quantity other ) => ToNormalizedString() == other.ToNormalizedString();
+        public bool Equals( Quantity other ) => Unit.Context == other.Unit.Context
+                                                && ToNormalizedString() == other.ToNormalizedString();
+
+        /// <summary>
+        /// Compares this quantity to another one.
+        /// </summary>
+        /// <param name="other">The other quantity to compare.</param>
+        /// <returns></returns>
+        public int CompareTo( Quantity other )
+        {
+            var tU = Unit;
+            var oU = other.Unit;
+            // Do the 2 units belong to the same (possibly null) context?
+            if( tU.Context == oU.Context )
+            {
+                // First chexk our equality: we must do this first to ensure coherency.
+                if( ToNormalizedString() == other.ToNormalizedString() )
+                {
+                    return 0;
+                }
+                // Same unit, we compare the Values.
+                if( tU == oU )
+                {
+                    return Value.CompareTo( other.Value );
+                }
+                // Same normalized units, we convert this Value to the other unit before comparison.
+                if( tU.Normalization == oU.Normalization )
+                {
+                    FullFactor ratio = tU.NormalizationFactor.DivideBy( oU.NormalizationFactor );
+                    return (Value * ratio.ToDouble()).CompareTo( other.Value );
+                }
+                // Inverted normalized units, we convert this Value to the other unit before comparison.
+                if( tU.Normalization == oU.Normalization.Invert() )
+                {
+                    FullFactor ratio = tU.NormalizationFactor.Multiply( oU.NormalizationFactor );
+                    return (1/(Value * ratio.ToDouble())).CompareTo( other.Value );
+                }
+                // No possible conversion. How to compare kilograms and milliSievert?
+                // Using their abbreviation (here kilgram will be "smaller" than milliSievert)
+                return tU.Abbreviation.CompareTo( oU.Abbreviation );
+            }
+            // Not in the same context.
+            if( tU == MeasureUnit.None ) return -1;
+            if( oU == MeasureUnit.None ) return 1;
+            return tU.Context.Name.CompareTo( oU.Context.Name );
+        }
     }
 }

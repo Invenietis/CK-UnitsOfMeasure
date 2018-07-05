@@ -57,6 +57,12 @@ namespace CK.Core
             }
         }
 
+        internal void SetPrefixedNormalization( PrefixedMeasureUnit n )
+        {
+            _normalizationFactor = new FullFactor( n.Prefix.Factor.Power( -1 ) );
+            _normalization = n;
+        }
+
         /// <summary>
         /// Gets the context to which this unit of measure belongs.
         /// </summary>
@@ -133,10 +139,10 @@ namespace CK.Core
         /// <param name="m">Other units to multiply.</param>
         /// <returns>The result of the multiplication.</returns>
         public MeasureUnit Multiply( MeasureUnit m ) => _ctx == null
-                                                        ? m.NullSafe()
-                                                        : (m == null || m == None
+                                                        ? m 
+                                                        : (m == None
                                                             ? this
-                                                            :Combinator.Create( _ctx, MeasureUnits.Concat( m.MeasureUnits ) ));
+                                                            : Combinator.Create( _ctx, MeasureUnits.Concat( m.MeasureUnits ) ));
 
         /// <summary>
         /// Returns the <see cref="MeasureUnit"/> that results from this one divided by another one.
@@ -144,10 +150,10 @@ namespace CK.Core
         /// <param name="m">The divisor.</param>
         /// <returns>The result of the division.</returns>
         public MeasureUnit DivideBy( MeasureUnit m ) => _ctx == null
-                                                        ? m.NullSafe().Invert()
-                                                        : m == null || m == None
+                                                        ? m.Invert()
+                                                        : (m == None
                                                             ? this
-                                                            : Combinator.Create( _ctx, MeasureUnits.Concat( m.Invert().MeasureUnits ) );
+                                                            : Combinator.Create( _ctx, MeasureUnits.Concat( m.Invert().MeasureUnits ) ));
 
         /// <summary>
         /// Returns this measure of units elevated to a given power.
@@ -233,19 +239,9 @@ namespace CK.Core
             return StandardMeasureContext.Default.DefineFundamental( abbreviation, name, normalizedPrefix );
         }
 
-        public static MeasureUnit operator /( MeasureUnit o1, MeasureUnit o2 ) => o1.NullSafe().DivideBy( o2 );
-        public static MeasureUnit operator *( MeasureUnit o1, MeasureUnit o2 ) => o1.NullSafe().Multiply( o2 );
-        public static MeasureUnit operator ^( MeasureUnit o, int exp ) => o.NullSafe().Power( exp );
-
-        //public static bool operator ==( MeasureUnit o1, MeasureUnit o2 ) => ReferenceEquals( o1, o2 )
-        //                                                                    || (ReferenceEquals( o1, null ) && ReferenceEquals( o2, None ))
-        //                                                                    || (ReferenceEquals( o1, None ) && ReferenceEquals( o2, null ));
-
-        //public static bool operator !=( MeasureUnit o1, MeasureUnit o2 ) => !(o1 == o2);
-
-        //public override bool Equals( object obj ) => ReferenceEquals( this, obj ) || (_ctx == null && ReferenceEquals( obj, null ) );
-
-        //public override int GetHashCode() => _ctx == null ? 0 : base.GetHashCode();
+        public static MeasureUnit operator /( MeasureUnit o1, MeasureUnit o2 ) => o1.DivideBy( o2 );
+        public static MeasureUnit operator *( MeasureUnit o1, MeasureUnit o2 ) => o1.Multiply( o2 );
+        public static MeasureUnit operator ^( MeasureUnit o, int exp ) => o.Power( exp );
 
         /// <summary>
         /// Returns the abbreviation optionally suffixed with its " (<see cref="Name"/>)".

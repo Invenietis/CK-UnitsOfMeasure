@@ -6,9 +6,10 @@ namespace CK.Core
 {
     public class StandardMeasureContext : MeasureContext
     {
-        public static readonly StandardMeasureContext Default = new StandardMeasureContext();
+        public static readonly StandardMeasureContext Default = new StandardMeasureContext( String.Empty, true );
 
-        public StandardMeasureContext()
+        StandardMeasureContext( string name, bool isDefault )
+            : base( name, isDefault )
         {
             Unit = DefineFundamental( "#", "Unit" );
             Metre = DefineFundamental( "m", "Metre" );
@@ -21,6 +22,11 @@ namespace CK.Core
             Bit = DefineFundamental( "b", "Bit" );
             Kilogram = (PrefixedMeasureUnit)this["kg"];
             Byte = DefineAlias( "B", "Byte", new FullFactor( new ExpFactor( 3, 0 ) ), Bit );
+        }
+
+        public StandardMeasureContext( string name )
+            : this( name, false )
+        {
         }
 
         /// <summary>
