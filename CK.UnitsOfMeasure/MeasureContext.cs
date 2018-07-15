@@ -7,7 +7,10 @@ using System.Text;
 
 namespace CK.UnitsOfMeasure
 {
-    public class MeasureContext
+    /// <summary>
+    /// A MeasureContext manages a set of <see cref="MeasureUnit"/>.
+    /// </summary>
+    public partial class MeasureContext
     {
         readonly ConcurrentDictionary<string, MeasureUnit> _allUnits;
 
@@ -46,6 +49,40 @@ namespace CK.UnitsOfMeasure
         }
 
         /// <summary>
+        /// Checks whether a new unit abbreviation can be defined in this context.
+        /// </summary>
+        /// <param name="a">The proposed abbreviation.</param>
+        /// <returns>True if the abbreviation can be used, false otherwise.</returns>
+        public bool IsValidNewAbbreviation( string a )
+        {
+            if( String.IsNullOrEmpty( a )
+                || !a.All( c => Char.IsLetter( c ) || Char.IsSymbol( c ) || c == '#' ) )
+            {
+                return false;
+            }
+            foreach( var withPrefix in MeasureStandardPrefix.All
+                                            .Select( p => p.Abbreviation + a ) )
+            {
+                if( _allUnits.ContainsKey( withPrefix ) ) return false;
+            }
+
+            var prefix = MeasureStandardPrefix.FindPrefix( a );
+            // Optimization: if the new abbreviation does not start with a
+            // standard prefix, it is useless to challenge it against
+            // existing units.
+            if( prefix != MeasureStandardPrefix.None )
+            {
+                return !_allUnits.Values
+                            .Where( u => u is FundamentalMeasureUnit || u is AliasMeasureUnit )
+                            .SelectMany( u => MeasureStandardPrefix.All
+                                                .Where( p => p != MeasureStandardPrefix.None )
+                                                .Select( p => p.Abbreviation + u.Abbreviation ) )
+                            .Any( exists => exists == a );
+            }
+            return true;
+        }
+
+        /// <summary>
         /// Defines an alias.
         /// The same alias can be registered multiple times but it has to exactly match the previously registered one.
         /// </summary>
@@ -62,8 +99,8 @@ namespace CK.UnitsOfMeasure
         /// <returns>The alias unit of measure.</returns>
         public AliasMeasureUnit DefineAlias( string abbreviation, string name, FullFactor definitionFactor, MeasureUnit definition )
         {
-            if( string.IsNullOrWhiteSpace( abbreviation ) ) throw new ArgumentException( "Must not be null or white space.", nameof( abbreviation ) );
-            if( string.IsNullOrWhiteSpace( name ) ) throw new ArgumentException( "Must not be null or white space.", nameof( name ) );
+            if( !IsValidNewAbbreviation( abbreviation ) ) throw new ArgumentException( $"Invalid abbreviation {abbreviation}.", nameof( abbreviation ) );
+            if( String.IsNullOrWhiteSpace( name ) ) throw new ArgumentException( "Must not be null or white space.", nameof( name ) );
             if( definitionFactor.IsZero ) throw new ArgumentException( "Must not be zero.", nameof( definitionFactor ) );
             if( definition == null ) throw new ArgumentNullException( nameof( definition ) );
             if( definition.Context != this ) throw new Exception( "Units' Context mismatch." );
@@ -89,8 +126,8 @@ namespace CK.UnitsOfMeasure
         /// <returns>The fundamental unit of measure.</returns>
         public FundamentalMeasureUnit DefineFundamental( string abbreviation, string name, MeasureStandardPrefix normalizedPrefix = null )
         {
-            if( string.IsNullOrWhiteSpace( abbreviation ) ) throw new ArgumentException( "Must not be null or white space.", nameof( abbreviation ) );
-            if( string.IsNullOrWhiteSpace( name ) ) throw new ArgumentException( "Must not be null or white space.", nameof( name ) );
+            if( !IsValidNewAbbreviation( abbreviation ) ) throw new ArgumentException( $"Invalid abbreviation {abbreviation}.", nameof( abbreviation ) );
+            if( String.IsNullOrWhiteSpace( name ) ) throw new ArgumentException( "Must not be null or white space.", nameof( name ) );
             if( normalizedPrefix == null || normalizedPrefix == MeasureStandardPrefix.None )
             {
                 return RegisterFundamental( abbreviation, name, true );

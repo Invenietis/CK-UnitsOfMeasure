@@ -8,7 +8,7 @@ using System.Diagnostics;
 namespace CK.UnitsOfMeasure
 {
     /// <summary>
-    /// A <see cref="ExponentMeasureUnit"/> is an exponentiation of a <see cref="Core.AtomicMeasureUnit"/>
+    /// A <see cref="ExponentMeasureUnit"/> is an exponentiation of a <see cref="AtomicMeasureUnit"/>
     /// (like "m3", "s-1", "Pa3" or "dm2").
     /// </summary>
     public class ExponentMeasureUnit : MeasureUnit, IComparable<ExponentMeasureUnit>
@@ -30,7 +30,8 @@ namespace CK.UnitsOfMeasure
 
         /// <summary>
         /// Gets the exponent that applies to the <see cref="AtomicMeasureUnit"/>.
-        /// When this is itself a <see cref="AtomicMeasureUnit"/> it is 1 (even for the <see cref="MeasureUnit.None"/>).
+        /// When this is itself a <see cref="AtomicMeasureUnit"/> it is 1 (even for
+        /// the special, unique, <see cref="MeasureUnit.None"/>).
         /// It can never be 0.
         /// </summary>
         public int Exponent { get; }
@@ -48,6 +49,12 @@ namespace CK.UnitsOfMeasure
             return (u.Abbreviation + e, u.Name + "^" + e);
         }
 
+        /// <summary>
+        /// ExponentMeasureUnit are ordered first by decreasing order of their <see cref="Exponent"/>
+        /// and then by their <see cref="AtomicMeasureUnit"/> (that use their <see cref="MeasureUnit.Abbreviation"/>).
+        /// </summary>
+        /// <param name="other">The other exponent unit to compare to. Can be null.</param>
+        /// <returns>Standard comparison result (positive, zero or negative).</returns>
         public int CompareTo( ExponentMeasureUnit other )
         {
             if( other == null ) return 1;

@@ -7,7 +7,7 @@ namespace CK.UnitsOfMeasure
 {
     public partial class MeasureUnit
     {
-        struct Combinator
+        internal struct Combinator
         {
             readonly List<AtomicMeasureUnit> _normM;
             readonly List<int> _normE;
@@ -52,13 +52,17 @@ namespace CK.UnitsOfMeasure
                 if( count == 1 )
                 {
                     int exp = _normE[0];
-                    return exp != 0 ? ctx.RegisterExponent( exp, _normM[0] ) : None;
+                    return exp == 0
+                            ? None
+                            : (exp == 1
+                                ? _normM[0]
+                                : ctx.RegisterExponent( exp, _normM[0] ));
                 }
                 var result = new List<ExponentMeasureUnit>( count );
                 for( int i = 0; i < count; ++i )
                 {
                     int exp = _normE[i];
-                    if( exp != 0 ) result.Add( ctx.RegisterExponent( exp, _normM[i] ) );
+                    if( exp != 0 ) result.Add( exp == 1 ? _normM[i] : ctx.RegisterExponent( exp, _normM[i] ) );
                 }
                 count = result.Count;
                 if( count == 0 ) return None;

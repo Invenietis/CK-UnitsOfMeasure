@@ -245,7 +245,7 @@ namespace CK.UnitsOfMeasure
                     return (1/(Value * ratio.ToDouble())).CompareTo( other.Value );
                 }
                 // No possible conversion. How to compare kilograms and milliSievert?
-                // Using their abbreviation (here kilgram will be "smaller" than milliSievert)
+                // Using their abbreviation (here kilogram will be "smaller" than milliSievert)
                 return tU.Abbreviation.CompareTo( oU.Abbreviation );
             }
             // Not in the same context.

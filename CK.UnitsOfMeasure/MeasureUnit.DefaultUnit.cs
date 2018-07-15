@@ -11,6 +11,14 @@ namespace CK.UnitsOfMeasure
     public partial class MeasureUnit
     {
         /// <summary>
+        /// Tries to parse a string in the default context (<see cref="StandardMeasureContext.Default"/>).
+        /// </summary>
+        /// <param name="text">The text to parse.</param>
+        /// <param name="u">The resulting measure unit.</param>
+        /// <returns>True on success, false otherwise.</returns>
+        public static bool TryParse( string text, out MeasureUnit u ) => StandardMeasureContext.Default.TryParse( text, out u );
+
+        /// <summary>
         /// Dimensionles unit. Associated abbreviation is "" (the empty string) and its name is "None".
         /// Its <see cref="Context"/> is null: the None unit is logically bound to all contexts.
         /// </summary>

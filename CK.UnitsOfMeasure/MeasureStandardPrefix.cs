@@ -8,7 +8,9 @@ namespace CK.UnitsOfMeasure
 {
     /// <summary>
     /// Represents a standard prefix like "Kilo" (abbrev. "k") or "Mega" (abbrev. "M")
-    /// or binary prefix like "Kibi" (abbrev. "ki"). 
+    /// or binary prefix like "Kibi" (abbrev. "ki").
+    /// All standard prefix are registered in a static dictionary and there is no way to add
+    /// new prefix.
     /// See http://en.wikipedia.org/wiki/Metric_prefix and https://en.wikipedia.org/wiki/Binary_prefix.
     public sealed class MeasureStandardPrefix
     {
@@ -67,8 +69,8 @@ namespace CK.UnitsOfMeasure
         public AtomicMeasureUnit On( AtomicMeasureUnit unit ) => Combine( this, unit, true ).Result;
 
         /// <summary>
-        /// Applies this metric to a <see cref="AtomicMeasureUnit"/>, allowing the creation of adjusted
-        /// <see cref="PrefixedMeasureUnit"/> or not.
+        /// Applies this metric to a <see cref="AtomicMeasureUnit"/>, allowing the creation of
+        /// potentially adjusted <see cref="PrefixedMeasureUnit"/>.
         /// </summary>
         /// <param name="unit">The original unit.</param>
         /// <param name="allowAdjustmentPrefix">
@@ -94,7 +96,14 @@ namespace CK.UnitsOfMeasure
             return (ExpFactor.Neutral, u.Context.RegisterPrefixed( ExpFactor.Neutral, prefix, u ));
         }
 
-        static (ExpFactor Adjustment, MeasureStandardPrefix Prefix) FindBest( ExpFactor newExp )
+        /// <summary>
+        /// Finds the best prefix given a <see cref="ExpFactor"/>.
+        /// If both metric and binary exponents exist (ie. are not zero), the metric prefix
+        /// is selected (the Exp2 is injected in the adjustment factor).
+        /// </summary>
+        /// <param name="newExp">Must not be the neutral factor.</param>
+        /// <returns>The best prefix with the required adjustment factor.</returns>
+        internal static (ExpFactor Adjustment, MeasureStandardPrefix Prefix) FindBest( ExpFactor newExp )
         {
             // Privilegiates metric prefix if any.
             Debug.Assert( !newExp.IsNeutral );
@@ -233,7 +242,7 @@ namespace CK.UnitsOfMeasure
         /// <summary>
         /// Gets all standard prefixes (including <see cref="None"/>).
         /// </summary>
-        public static IReadOnlyCollection<MeasureStandardPrefix> All => _prefixes.Values;
+        public static IEnumerable<MeasureStandardPrefix> All => _allMetric.Concat( _allBinary );
 
         /// <summary>
         /// Gets all the metric prefixes.
@@ -244,6 +253,42 @@ namespace CK.UnitsOfMeasure
         /// Gets all the binary prefixes.
         /// </summary>
         public static IReadOnlyCollection<MeasureStandardPrefix> BinaryPrefixes => _allBinary;
+
+        /// <summary>
+        /// Based on the first or first and second charaters of the given string, tries to find
+        /// the corresponding <see cref="Abbreviation"/>.
+        /// </summary>
+        /// <param name="s">The string to search.</param>
+        /// <returns>The standard prefix or <see cref="None"/> if not found.</returns>
+        public static MeasureStandardPrefix FindPrefix( string s )
+        {
+            if( String.IsNullOrWhiteSpace( s ) ) return None;
+            switch( s[0] )
+            {
+                case 'y': return Yocto;
+                case 'z': return Zepto;
+                case 'a': return Atto;
+                case 'f': return Femto;
+                case 'p': return Pico;
+                case 'n': return Nano;
+                case 'µ': return Micro;
+                case 'm': return Milli;
+                case 'c': return Centi;
+                case 'd': return s.Length > 1 && s[1] == 'a' ? Deca : Deci;
+                case 'h': return Hecto;
+                case 'k': return Kilo;
+                case 'K': return s.Length > 1 && s[1] == 'i' ? Kibi : None;
+                case 'M': return s.Length > 1 && s[1] == 'i' ? Mebi : Mega;
+                case 'G': return s.Length > 1 && s[1] == 'i' ? Gibi : Giga;
+                case 'T': return s.Length > 1 && s[1] == 'i' ? Tebi : Tera;
+                case 'P': return s.Length > 1 && s[1] == 'i' ? Pebi : Peta;
+                case 'E': return s.Length > 1 && s[1] == 'i' ? Exbi : Exa;
+                case 'Z': return s.Length > 1 && s[1] == 'i' ? Zebi : Zetta;
+                case 'Y': return s.Length > 1 && s[1] == 'i' ? Yobi : Yotta;
+            }
+            return None;
+        }
     }
+
 }
 

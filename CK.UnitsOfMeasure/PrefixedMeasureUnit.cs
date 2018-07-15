@@ -8,7 +8,7 @@ using System.Diagnostics;
 namespace CK.UnitsOfMeasure
 {
     /// <summary>
-    /// A <see cref="MeasureStandardPrefix"/> applied to a <see cref="Core.AtomicMeasureUnit"/>. 
+    /// A <see cref="MeasureStandardPrefix"/> applied to a <see cref="AtomicMeasureUnit"/>. 
     /// See http://en.wikipedia.org/wiki/Metric_prefix and https://en.wikipedia.org/wiki/Binary_prefix.
     /// </summary>
     public sealed class PrefixedMeasureUnit : AtomicMeasureUnit

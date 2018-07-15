@@ -15,11 +15,12 @@ namespace CK.UnitsOfMeasure.Tests
         [Test]
         public void simple_operations()
         {
-            var metre = MeasureUnit.Metre;
-            var second = MeasureUnit.Second;
+            var c = new StandardMeasureContext( "Empty" );
+            var metre = c.Metre;
+            var second = c.Second;
             var kilometre = MeasureStandardPrefix.Kilo[metre];
-            var minute = MeasureUnit.DefineAlias( "min", "Minute", 60, second );
-            var hour = MeasureUnit.DefineAlias( "h", "Hour", 60, minute );
+            var minute = c.DefineAlias( "min", "Minute", 60, second );
+            var hour = c.DefineAlias( "h", "Hour", 60, minute );
             var speed = kilometre / hour;
 
             var myDistance = 3.WithUnit( kilometre );
@@ -205,5 +206,22 @@ namespace CK.UnitsOfMeasure.Tests
             String.Join( ", ", l.Select( e => $"{e} ({(e.Unit.Context == null ? "*" : e.Unit.Context.Name)})" ) )
                 .Should().Be( "-1 (*), 0 (*), 2 (*), 1 g (), 2 g (), 1 m (), 2 m (), 3 g (A), -1 g (B)" );
         }
+
+        [Test]
+        public void informational_quantities()
+        {
+            var kiloByte = MeasureStandardPrefix.Kilo[MeasureUnit.Byte];
+            var kibiByte = MeasureStandardPrefix.Kibi[MeasureUnit.Byte];
+
+            var kb80 = 80.WithUnit( kiloByte );
+            kb80.CanConvertTo( MeasureUnit.Bit ).Should().BeTrue();
+            kb80.ConvertTo( MeasureUnit.Bit ).ToString().Should().Be( "640000 b" );
+
+            var kib80 = kb80.ConvertTo( kibiByte );
+            kib80.ToString( CultureInfo.InvariantCulture ).Should().Be( "78.125 KiB" );
+
+        }
+
+
     }
 }

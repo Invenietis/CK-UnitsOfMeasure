@@ -5,9 +5,9 @@ using System.Text;
 namespace CK.UnitsOfMeasure
 {
     /// <summary>
-    /// Immutable struct that captures 2^<see cref="Exp2"/>.10^<see cref="Exp10"/>.
+    /// Immutable struct that captures <see cref="Factor"/>.2^<see cref="Exp2"/>.10^<see cref="Exp10"/>.
     /// </summary>
-    public struct FullFactor : IEquatable<FullFactor>
+    public readonly struct FullFactor : IEquatable<FullFactor>
     {
         /// <summary>
         /// The neutral factor: <see cref="Factor"/> = 1 and <see cref="ExpFactor.Neutral"/>.
@@ -22,12 +22,12 @@ namespace CK.UnitsOfMeasure
         /// <summary>
         /// The linear factor.
         /// </summary>
-        public double Factor;
+        public readonly double Factor;
 
         /// <summary>
         /// The exponent factor.
         /// </summary>
-        public ExpFactor ExpFactor;
+        public readonly ExpFactor ExpFactor;
 
         /// <summary>
         /// Gets whether this is the neutral factor.

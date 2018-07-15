@@ -139,14 +139,14 @@ namespace CK.UnitsOfMeasure.Tests
             belowTheAtom.Abbreviation.Should().Be( "zg" );
             belowTheAtom.Name.Should().Be( "Zeptogram", "The Zeptogram is 10^-24 kilogram." );
             belowTheAtom.Normalization.Should().BeSameAs( MeasureUnit.Kilogram );
-            belowTheAtom.NormalizationFactor.Should().Be( new FullFactor( new ExpFactor(0, -24) ) );
+            belowTheAtom.NormalizationFactor.Should().Be( new FullFactor( new ExpFactor( 0, -24 ) ) );
 
-            var decizettametre = MeasureStandardPrefix.Deci[belowTheAtom];
-            decizettametre.Abbreviation.Should().Be( "(10^-1)zg" );
-            var decidecizettametre = MeasureStandardPrefix.Deci[decizettametre];
-            decidecizettametre.Abbreviation.Should().Be( "(10^1)yg" );
+            var decizettaGram = MeasureStandardPrefix.Deci[belowTheAtom];
+            decizettaGram.Abbreviation.Should().Be( "(10^-1)zg" );
+            var decidecizettaGram = MeasureStandardPrefix.Deci[decizettaGram];
+            decidecizettaGram.Abbreviation.Should().Be( "(10^1)yg" );
 
-            var yoctogram = MeasureStandardPrefix.Deci[decidecizettametre];
+            var yoctogram = MeasureStandardPrefix.Deci[decidecizettaGram];
             yoctogram.Abbreviation.Should().Be( "yg" );
 
             var below1 = MeasureStandardPrefix.Deci[yoctogram];
@@ -156,6 +156,7 @@ namespace CK.UnitsOfMeasure.Tests
             below2.Abbreviation.Should().Be( "(10^-2)yg" );
 
         }
+
 
     }
 }

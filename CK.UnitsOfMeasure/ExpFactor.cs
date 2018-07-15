@@ -52,7 +52,7 @@ namespace CK.UnitsOfMeasure
         public double ToDouble() => Math.Pow( 2, Exp2 ) * Math.Pow( 10, Exp10 );
 
         /// <summary>
-        /// Gets the string representation. Can be the empty sring (if <see cref="IsNeutral"/>) or
+        /// Gets the string representation. Can be the empty string (if <see cref="IsNeutral"/>) or
         /// the "10^<see cref="Exp10"/>.2^<see cref="Exp2"/>" optionally prefixed by a '*'.
         /// </summary>
         /// <param name="withMultPrefix">True to prefix by '*' when <see cref="IsNeutral"/> is false.</param>
@@ -65,7 +65,7 @@ namespace CK.UnitsOfMeasure
                 s = (withMultPrefix ? "*10^" : "10^") + Exp10;
                 if( Exp2 != 0 ) s += "*2^" + Exp2;
             }
-            else if( Exp2 != 0 ) s = (withMultPrefix ? ".2^" : "2^") + Exp2;
+            else if( Exp2 != 0 ) s = (withMultPrefix ? "*2^" : "2^") + Exp2;
             return s;
         }
 

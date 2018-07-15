@@ -1,6 +1,7 @@
 using FluentAssertions;
 using NUnit.Framework;
 using System;
+using System.Linq;
 using static CK.UnitsOfMeasure.MeasureUnit;
 
 namespace CK.UnitsOfMeasure.Tests
@@ -50,6 +51,31 @@ namespace CK.UnitsOfMeasure.Tests
 
             var newtonPerDyne = newton / dyne;
             newtonPerDyne.Abbreviation.Should().Be( "N.dyn-1" );
+        }
+
+        [Test]
+        public void new_units_clash_name_detetction()
+        {
+            var c = new StandardMeasureContext( "Empty" );
+            var sievert = c.DefineAlias( "Sv", "Sievert", FullFactor.Neutral, (c.Metre ^ 2) * (c.Second ^ 2) );
+            MeasureStandardPrefix.All.Select( p => p.Abbreviation + "Sv" )
+                                     .Where( a => c.IsValidNewAbbreviation( a ) )
+                                     .Should().BeEmpty();
+
+            var x = c.DefineAlias( "xSv", "Bad name anyway", FullFactor.Neutral, c.Ampere );
+            x.ToString().Should().Be( "xSv" );
+
+            c.Invoking( sut => sut.DefineAlias( "", "no way", FullFactor.Neutral, c.Metre ) )
+                .Should().Throw<ArgumentException>();
+
+            c.Invoking( sut => sut.DefineAlias( "p2", "no digit allowed", FullFactor.Neutral, c.Metre ) )
+                .Should().Throw<ArgumentException>();
+
+            c.Invoking( sut => sut.DefineAlias( "p2p", "no digit allowed", FullFactor.Neutral, c.Metre ) )
+                .Should().Throw<ArgumentException>();
+
+            c.Invoking( sut => sut.DefineAlias( "damol", "no way", FullFactor.Neutral, c.Metre ) )
+                .Should().Throw<ArgumentException>();
         }
     }
 }
