@@ -59,8 +59,11 @@ namespace CK.UnitsOfMeasure
         public bool IsValidNewAbbreviation( string a, AutoStandardPrefix autoStandardPrefix )
         {
             if( String.IsNullOrEmpty( a )
-                || !a.All( c => Char.IsLetter( c ) || Char.IsSymbol( c )
-                || c == '#' || c == '%' || c == '‰' || c == '‱' || c == '㏙' ) )
+                || !a.All( c => Char.IsLetter( c )
+                                || Char.IsSymbol( c )
+                                || c == '#'
+                                || c == '%' || c == '‰' || c == '‱'
+                                || c == '㏙' ) )
             {
                 return false;
             }
