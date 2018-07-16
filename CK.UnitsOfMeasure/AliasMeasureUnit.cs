@@ -16,8 +16,9 @@ namespace CK.UnitsOfMeasure
             MeasureContext ctx,
             string abbreviation, string name,
             FullFactor definitionFactor,
-            MeasureUnit definition )
-            : base( ctx, abbreviation, name, false )
+            MeasureUnit definition,
+            AutoStandardPrefix stdPrefix )
+            : base( ctx, abbreviation, name, stdPrefix, false )
         {
             DefinitionFactor = definitionFactor;
             Definition = definition;

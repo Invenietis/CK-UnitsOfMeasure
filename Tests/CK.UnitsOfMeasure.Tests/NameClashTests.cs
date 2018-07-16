@@ -13,12 +13,16 @@ namespace CK.UnitsOfMeasure.Tests
         public void new_units_clash_name_detection()
         {
             var c = new StandardMeasureContext( "Empty" );
-            var sievert = c.DefineAlias( "Sv", "Sievert", FullFactor.Neutral, (c.Metre ^ 2) * (c.Second ^ 2) );
-            MeasureStandardPrefix.All.Select( p => p.Abbreviation + "Sv" )
-                                     .Where( a => c.IsValidNewAbbreviation( a ) )
+            var sievert = c.DefineAlias( "Sv", "Sievert", FullFactor.Neutral, (c.Metre ^ 2) * (c.Second ^ 2), AutoStandardPrefix.Metric );
+            MeasureStandardPrefix.MetricPrefixes.Select( p => p.Abbreviation + "Sv" )
+                                     .Where( a => c.IsValidNewAbbreviation( a, AutoStandardPrefix.None ) )
                                      .Should().BeEmpty();
 
-            var x = c.DefineAlias( "xSv", "Bad name anyway", FullFactor.Neutral, c.Ampere );
+            MeasureStandardPrefix.BinaryPrefixes.Select( p => p.Abbreviation + "Sv" )
+                                     .Where( a => c.IsValidNewAbbreviation( a, AutoStandardPrefix.None ) == false )
+                                     .Should().BeEmpty();
+
+            var x = c.DefineAlias( "xSv", "Bad name but okay...", FullFactor.Neutral, c.Ampere );
             x.ToString().Should().Be( "xSv" );
 
             c.Invoking( sut => sut.DefineAlias( "", "no way", FullFactor.Neutral, c.Metre ) )
@@ -35,12 +39,32 @@ namespace CK.UnitsOfMeasure.Tests
         }
 
         [Test]
-        public void when_minute_is_defined_inch_can_no_more_exist()
+        public void minute_and_inch_can_coexist_unless_inch_supports_metric_prefixes()
         {
-            var c = new StandardMeasureContext( "Empty" );
-            var minute = c.DefineAlias( "min", "Minute", new FullFactor( 60 ), c.Second );
-            c.IsValidNewAbbreviation( "in" ).Should().BeFalse();
+            var cWithMinute = new StandardMeasureContext( "WithMinute" );
+            var minute = cWithMinute.DefineAlias( "min", "Minute", new FullFactor( 60 ), cWithMinute.Second );
+            cWithMinute.IsValidNewAbbreviation( "in", AutoStandardPrefix.None ).Should().BeTrue();
+            cWithMinute.IsValidNewAbbreviation( "in", AutoStandardPrefix.Binary ).Should().BeTrue();
+            cWithMinute.IsValidNewAbbreviation( "in", AutoStandardPrefix.Metric ).Should().BeFalse();
+
+            var cWithInchMetric = new StandardMeasureContext( "WithInchMetric" );
+            var inch = cWithInchMetric.DefineAlias( "in",
+                                                    "Inch",
+                                                    2.54,
+                                                    MeasureStandardPrefix.Centi[cWithInchMetric.Metre],
+                                                    AutoStandardPrefix.Metric );
+            cWithInchMetric.IsValidNewAbbreviation( "min", AutoStandardPrefix.None ).Should().BeFalse();
         }
+
+        [Test]
+        public void applying_unsupported_prefixes_to_a_unit_uses_the_adjustment_factor()
+        {
+            var c = new MeasureContext( "Empty" );
+            var percent = c.DefineAlias( "%", "Percent", new ExpFactor(0,-2), MeasureUnit.None );
+            var milliPercent = MeasureStandardPrefix.Milli[percent];
+            milliPercent.ToString().Should().Be( "(10^-3)%" );
+        }
+
     }
 }
 

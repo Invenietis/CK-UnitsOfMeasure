@@ -15,8 +15,8 @@ namespace CK.UnitsOfMeasure
     /// </summary>
     public class FundamentalMeasureUnit : AtomicMeasureUnit
     {
-        internal FundamentalMeasureUnit( MeasureContext ctx, string abbreviation, string name, bool isNormalized )
-            : base( ctx, abbreviation, name, isNormalized )
+        internal FundamentalMeasureUnit( MeasureContext ctx, string abbreviation, string name, AutoStandardPrefix stdPrefix, bool isNormalized )
+            : base( ctx, abbreviation, name, stdPrefix, isNormalized )
         {
         }
 

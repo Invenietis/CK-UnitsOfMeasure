@@ -222,6 +222,33 @@ namespace CK.UnitsOfMeasure.Tests
 
         }
 
+        [Test]
+        public void dimensionless_quantity_like_percent_or_permille_works()
+        {
+            var percent = MeasureUnit.DefineAlias( "%", "Percent", new ExpFactor( 0, -2 ), MeasureUnit.None );
+            var permille = MeasureUnit.DefineAlias( "‰", "Permille", new ExpFactor( 0, -3 ), MeasureUnit.None );
+            var pertenthousand = MeasureUnit.DefineAlias( "‱", "Pertenthousand", new ExpFactor( 0, -4 ), MeasureUnit.None );
+
+            var pc10 = 10.WithUnit( percent );
+            pc10.ToString().Should().Be( "10 %" );
+
+            var pm20 = 20.WithUnit( permille );
+            pm20.ToString().Should().Be( "20 ‰" );
+
+            var pt30 = 30.WithUnit( pertenthousand );
+            pt30.ToString().Should().Be( "30 ‱" );
+
+            (pc10 * pm20 * pt30).ToString().Should().Be("6000 10^-9");
+
+            (pc10 + pm20 + pt30).ToString( CultureInfo.InvariantCulture ).Should().Be( "12.3 %" );
+            (pt30  + pc10 + pm20).ToString( CultureInfo.InvariantCulture ).Should().Be( "1230 ‱" );
+
+            var km = MeasureStandardPrefix.Kilo[MeasureUnit.Metre];
+            var km100 = 100.WithUnit( MeasureStandardPrefix.Kilo[MeasureUnit.Metre] );
+            var pc10OfKm100 = pc10 * km100;
+            pc10OfKm100.ToString().Should().Be( "1000 10^-2.km" );
+            pc10OfKm100.ConvertTo( km ).ToString().Should().Be( "10 km" );
+        }
 
     }
 }

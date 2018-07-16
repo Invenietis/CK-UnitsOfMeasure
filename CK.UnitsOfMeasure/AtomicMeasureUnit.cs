@@ -11,10 +11,18 @@ namespace CK.UnitsOfMeasure
     /// </summary>
     public abstract class AtomicMeasureUnit : ExponentMeasureUnit, IComparable<AtomicMeasureUnit>
     {
-        private protected AtomicMeasureUnit( MeasureContext ctx, string abbreviation, string name, bool isNormalized )
+        private protected AtomicMeasureUnit(
+            MeasureContext ctx,
+            string abbreviation,
+            string name,
+            AutoStandardPrefix stdPrefix,
+            bool isNormalized )
             : base( ctx, abbreviation, name, isNormalized )
         {
+            AutoStandardPrefix = stdPrefix;
         }
+
+        public AutoStandardPrefix AutoStandardPrefix { get; }
 
         /// <summary>
         /// AtomicMeasureUnit are ordered by their <see cref="MeasureUnit.Abbreviation"/>.

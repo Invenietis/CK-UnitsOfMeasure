@@ -22,7 +22,7 @@ namespace CK.UnitsOfMeasure
         /// Dimensionles unit. Associated abbreviation is "" (the empty string) and its name is "None".
         /// Its <see cref="Context"/> is null: the None unit is logically bound to all contexts.
         /// </summary>
-        public static FundamentalMeasureUnit None = new FundamentalMeasureUnit( null, "", "None", true );
+        public static FundamentalMeasureUnit None = new FundamentalMeasureUnit( null, "", "None", AutoStandardPrefix.None, true );
 
         /// <summary>
         /// Dimensionless unit. Used to count items. Associated abbreviation is "#".

@@ -157,6 +157,16 @@ namespace CK.UnitsOfMeasure.Tests
 
         }
 
+        [Test]
+        public void prefix_applied_to_non_prefixable_units_use_the_adjusment_factor()
+        {
+            var c = new MeasureContext( "NoPrefix" );
+            var tUnit = c.DefineFundamental( "T", "Thing", AutoStandardPrefix.Binary );
+            var kiloT = MeasureStandardPrefix.Kilo[tUnit];
+            var kibiT = MeasureStandardPrefix.Kibi[tUnit];
 
+            kiloT.Abbreviation.Should().Be( "(10^3)T" );
+            kibiT.Abbreviation.Should().Be( "KiT" );
+        }
     }
 }

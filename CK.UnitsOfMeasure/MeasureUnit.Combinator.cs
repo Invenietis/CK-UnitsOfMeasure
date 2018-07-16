@@ -11,11 +11,13 @@ namespace CK.UnitsOfMeasure
         {
             readonly List<AtomicMeasureUnit> _normM;
             readonly List<int> _normE;
+            ExpFactor _dimensionLessFactor;
 
             public Combinator( IEnumerable<ExponentMeasureUnit> units )
             {
                 _normM = new List<AtomicMeasureUnit>();
                 _normE = new List<int>();
+                _dimensionLessFactor = ExpFactor.Neutral;
                 if( units != null ) Add( units );
             }
 
@@ -24,7 +26,6 @@ namespace CK.UnitsOfMeasure
                 MeasureContext c = null;
                 foreach( var u in units )
                 {
-                    Debug.Assert( u != null && u != None && u.AtomicMeasureUnit != None );
                     if( c != u.Context && c != null ) throw new Exception( "Units' Context mismatch." );
                     Add( u.AtomicMeasureUnit, u.Exponent );
                     c = u.Context;
@@ -33,23 +34,35 @@ namespace CK.UnitsOfMeasure
 
             public void Add( AtomicMeasureUnit u, int exp )
             {
-                for( int i = 0; i < _normM.Count; ++i )
+                if( u.AtomicMeasureUnit.Normalization == None )
                 {
-                    if( _normM[i] == u )
-                    {
-                        _normE[i] += exp;
-                        return;
-                    }
+                    var fp = u.AtomicMeasureUnit.NormalizationFactor.ExpFactor.Power( exp );
+                    _dimensionLessFactor = _dimensionLessFactor.Multiply( fp );
                 }
-                _normM.Add( u );
-                _normE.Add( exp );
+                else
+                {
+                    for( int i = 0; i < _normM.Count; ++i )
+                    {
+                        if( _normM[i] == u )
+                        {
+                            _normE[i] += exp;
+                            return;
+                        }
+                    }
+                    _normM.Add( u );
+                    _normE.Add( exp );
+                }
             }
 
             public MeasureUnit GetResult( MeasureContext ctx )
             {
                 int count = _normM.Count;
-                if( count == 0 ) return None;
-                if( count == 1 )
+                if( count == 0 )
+                {
+                    if( _dimensionLessFactor.IsNeutral ) return None;
+                    return ctx.RegisterPrefixed( _dimensionLessFactor, MeasureStandardPrefix.None, None );
+                }
+                if( count == 1 && _dimensionLessFactor.IsNeutral )
                 {
                     int exp = _normE[0];
                     return exp == 0
@@ -63,6 +76,10 @@ namespace CK.UnitsOfMeasure
                 {
                     int exp = _normE[i];
                     if( exp != 0 ) result.Add( exp == 1 ? _normM[i] : ctx.RegisterExponent( exp, _normM[i] ) );
+                }
+                if( !_dimensionLessFactor.IsNeutral )
+                {
+                    result.Add( ctx.RegisterPrefixed( _dimensionLessFactor, MeasureStandardPrefix.None, None ) );
                 }
                 count = result.Count;
                 if( count == 0 ) return None;

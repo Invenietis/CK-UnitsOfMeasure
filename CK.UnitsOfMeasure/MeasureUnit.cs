@@ -211,10 +211,18 @@ namespace CK.UnitsOfMeasure
         /// Must not be <see cref="FullFactor.Zero"/>.
         /// </param>
         /// <param name="definition">The definition. Can be any <see cref="MeasureUnit"/>.</param>
+        /// <param name="autoStandardPrefix">
+        /// Whether standard metric and/or binary prefixes can be applied to the unit.
+        /// </param>
         /// <returns>The alias unit of measure.</returns>
-        public static AliasMeasureUnit DefineAlias( string abbreviation, string name, FullFactor definitionFactor, MeasureUnit definition )
+        public static AliasMeasureUnit DefineAlias(
+            string abbreviation,
+            string name,
+            FullFactor definitionFactor,
+            MeasureUnit definition,
+            AutoStandardPrefix autoStandardPrefix = AutoStandardPrefix.None )
         {
-            return StandardMeasureContext.Default.DefineAlias( abbreviation, name, definitionFactor, definition );
+            return StandardMeasureContext.Default.DefineAlias( abbreviation, name, definitionFactor, definition, autoStandardPrefix );
         }
 
         /// <summary>
@@ -228,15 +236,24 @@ namespace CK.UnitsOfMeasure
         /// This is the key that is used. It must not be null or empty.
         /// </param>
         /// <param name="name">The full name. Must not be null or empty.</param>
+        /// <param name="autoStandardPrefix">
+        /// Whether standard metric and/or binary prefixes can be applied to the unit.
+        /// If a <paramref name="normalizedPrefix"/> is used, this must necessarily define the
+        /// corresponding prefix kind.
+        /// </param>
         /// <param name="normalizedPrefix">
         /// Optional prefix to be used for units where the normalized unit should not be the <see cref="FundamentalMeasureUnit"/> but one of its
         /// <see cref="PrefixedMeasureUnit"/>. This is the case for the "g"/"Gram" and the "kg"/"Kilogram".
         /// Defaults to <see cref="MeasureStandardPrefix.None"/>: by default a fundamental unit is the normalized one.
         /// </param>
         /// <returns>The fundamental unit of measure.</returns>
-        public static FundamentalMeasureUnit DefineFundamental( string abbreviation, string name, MeasureStandardPrefix normalizedPrefix = null )
+        public static FundamentalMeasureUnit DefineFundamental(
+            string abbreviation,
+            string name,
+            AutoStandardPrefix autoStandardPrefix = AutoStandardPrefix.None,
+            MeasureStandardPrefix normalizedPrefix = null )
         {
-            return StandardMeasureContext.Default.DefineFundamental( abbreviation, name, normalizedPrefix );
+            return StandardMeasureContext.Default.DefineFundamental( abbreviation, name, autoStandardPrefix, normalizedPrefix );
         }
 
         public static MeasureUnit operator /( MeasureUnit o1, MeasureUnit o2 ) => o1.DivideBy( o2 );

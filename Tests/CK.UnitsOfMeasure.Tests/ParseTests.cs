@@ -53,7 +53,8 @@ namespace CK.UnitsOfMeasure.Tests
             u.ToString().Should().Be( rewrite );
         }
 
-        public void parsing_aliases_works_the_same()
+        [Test]
+        public void parsing_aliases()
         {
             var c = new StandardMeasureContext( "Empty" );
             var kg = c.Kilogram;
@@ -65,7 +66,25 @@ namespace CK.UnitsOfMeasure.Tests
 
             c.TryParse( "dyn-1.N", out var u ).Should().BeTrue();
             u.ToString().Should().Be( "N.dyn-1" );
-            u.Should().BeSameAs( dyne / newton );
+            u.Should().BeSameAs( newton / dyne );
         }
+
+        [TestCase( "10^-1", "10^-1" )]
+        [TestCase( "2^7.10^-1*10^3.2^3", "10^2.2^10" )]
+        [TestCase( "10^-1*2^7.10^3.2^3", "10^2.2^10" )]
+        [TestCase( "%", "%" )]
+        [TestCase( "10^2.%", "" )]
+        [TestCase( "%.10^2", "" )]
+        [TestCase( "%.‱", "10^-6" )]
+        public void parsing_dimensionless_units( string text, string rewrite )
+        {
+            var ctx = new StandardMeasureContext( "Empty" );
+            var percent = ctx.DefineAlias( "%", "Percent", new ExpFactor( 0, -2 ), MeasureUnit.None );
+            var permille = ctx.DefineAlias( "‰", "Permille", new ExpFactor( 0, -3 ), MeasureUnit.None );
+            var pertenthousand = ctx.DefineAlias( "‱", "Pertenthousand", new ExpFactor( 0, -4 ), MeasureUnit.None );
+            ctx.TryParse( text, out var u ).Should().BeTrue();
+            u.ToString().Should().Be( rewrite );
+        }
+
     }
 }

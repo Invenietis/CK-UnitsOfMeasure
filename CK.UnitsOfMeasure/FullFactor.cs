@@ -99,7 +99,7 @@ namespace CK.UnitsOfMeasure
             if( IsNeutral ) return String.Empty;
             if( IsZero ) return "0";
             if( Factor == 1.0 ) return ExpFactor.ToString();
-            return Factor.ToString() + ExpFactor.ToString( true );
+            return Factor.ToString() + ExpFactor.ToString( '*' );
         }
 
         public static bool operator ==( FullFactor f1, FullFactor f2 ) => f1.Equals( f2 );

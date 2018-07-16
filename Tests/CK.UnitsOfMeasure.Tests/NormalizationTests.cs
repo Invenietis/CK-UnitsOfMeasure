@@ -72,7 +72,7 @@ namespace CK.UnitsOfMeasure.Tests
             var newton = kilogram * metre * (second ^ -2);
             newton.Abbreviation.Should().Be( "kg.m.s-2" );
 
-            // With FundamentalMeasureUnit as the only normalized form:
+            // With FundamentalMeasureUnit as the only normalized form, we previously had:
             //newton.Normalization.Abbreviation.Should().Be( "g.m.s-2" );
             //newton.NormalizationFactor.Should().Be( new FullFactor( new ExpFactor( 0, 3 ) ) );
 
@@ -81,5 +81,22 @@ namespace CK.UnitsOfMeasure.Tests
             newton.NormalizationFactor.Should().Be( FullFactor.Neutral );
         }
 
+        [Test]
+        public void dimensionless_units()
+        {
+            // See https://en.wikipedia.org/wiki/Per_mille
+            var percent = MeasureUnit.DefineAlias( "%", "Percent", new ExpFactor( 0, -2 ), MeasureUnit.None );
+            var permille = MeasureUnit.DefineAlias( "‰", "Permille", new ExpFactor( 0, -3 ), MeasureUnit.None );
+            var pertenthousand = MeasureUnit.DefineAlias( "‱", "Pertenthousand", new ExpFactor( 0, -4 ), MeasureUnit.None );
+
+            percent.ToString().Should().Be( "%" );
+            percent.Normalization.Should().BeSameAs( MeasureUnit.None );
+            percent.NormalizationFactor.Should().Be( new FullFactor( new ExpFactor( 0, -2 ) ) );
+
+            var perht = percent * permille;
+            perht.ToString().Should().Be( "10^-5" );
+            perht.Normalization.Should().BeSameAs( MeasureUnit.None );
+            perht.NormalizationFactor.Should().Be( new FullFactor( new ExpFactor( 0, -5 ) ) );
+        }
     }
 }

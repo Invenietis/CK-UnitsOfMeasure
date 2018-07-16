@@ -12,7 +12,7 @@ namespace CK.UnitsOfMeasure
     public partial class MeasureContext
     {
 
-        static Regex _rUnit = new Regex( @"(\(((?<1>(10|2)\^-?\d+)(\*|\.)?)*\))?(?<2>[^\*\.\-0123456789]+)(?<3>-?\d+)?(?=\*|\.)?",
+        static Regex _rUnit = new Regex( @"(\(((?<1>(10|2)\^-?\d+)(\*|\.)?)*\))?(?<2>[^\*\.\-0123456789]+)(?<3>-?\d+)?|(?<4>(10|2)\^-?\d+)(?=\*|\.)?",
                                     RegexOptions.Compiled
                                     | RegexOptions.CultureInvariant
                                     | RegexOptions.ExplicitCapture );
@@ -41,6 +41,14 @@ namespace CK.UnitsOfMeasure
         {
             if( !skipFirstLookup && TryGetExistingExponent( match.ToString(), out u ) ) return true;
             u = null;
+            // Handling dimensionless unit.
+            var factor = match.Groups[4].Value;
+            if( factor.Length > 0 )
+            {
+                var f = ParseFactor( factor, ExpFactor.Neutral );
+                u = RegisterPrefixed( f, MeasureStandardPrefix.None, MeasureUnit.None );
+                return true;
+            }
             string sExp = match.Groups[3].Value;
             int exp = sExp.Length > 0 ? Int32.Parse( sExp ) : 1;
             if( exp == 0 )
@@ -63,11 +71,7 @@ namespace CK.UnitsOfMeasure
             ExpFactor adjustment = ExpFactor.Neutral;
             foreach( Capture f in match.Groups[1].Captures )
             {
-                if( f.Value[0] == '2' )
-                {
-                    adjustment = adjustment.Multiply( new ExpFactor( Int16.Parse( f.Value.Substring( 2 ) ), 0 ) );
-                }
-                else adjustment = adjustment.Multiply( new ExpFactor( 0, Int16.Parse( f.Value.Substring( 3 ) ) ) );
+                adjustment = ParseFactor( f.Value, adjustment );
             }
             string withoutAdjustment = match.Groups[2].Value;
             if( _allUnits.TryGetValue( withoutAdjustment, out unit ) )
@@ -96,15 +100,25 @@ namespace CK.UnitsOfMeasure
             return false;
         }
 
-        private ExponentMeasureUnit CreateExponentPrefixed( int exp, ExpFactor adjustment, AtomicMeasureUnit basic )
+        ExpFactor ParseFactor( string s, ExpFactor f )
+        {
+            if( s[0] == '2' )
+            {
+                f = f.Multiply( new ExpFactor( Int16.Parse( s.Substring( 2 ) ), 0 ) );
+            }
+            else f = f.Multiply( new ExpFactor( 0, Int16.Parse( s.Substring( 3 ) ) ) );
+            return f;
+        }
+
+        ExponentMeasureUnit CreateExponentPrefixed( int exp, ExpFactor adjustment, AtomicMeasureUnit atomic )
         {
             ExponentMeasureUnit u;
             if( !adjustment.IsNeutral )
             {
-                var best = MeasureStandardPrefix.FindBest( adjustment );
-                basic = RegisterPrefixed( best.Adjustment, best.Prefix, basic );
+                var best = MeasureStandardPrefix.FindBest( adjustment, atomic.AutoStandardPrefix );
+                atomic = RegisterPrefixed( best.Adjustment, best.Prefix, atomic );
             }
-            u = RegisterExponent( exp, basic );
+            u = RegisterExponent( exp, atomic );
             return u;
         }
 

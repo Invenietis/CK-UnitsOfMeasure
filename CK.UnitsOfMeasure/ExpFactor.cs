@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 
 namespace CK.UnitsOfMeasure
@@ -53,27 +54,27 @@ namespace CK.UnitsOfMeasure
 
         /// <summary>
         /// Gets the string representation. Can be the empty string (if <see cref="IsNeutral"/>) or
-        /// the "10^<see cref="Exp10"/>.2^<see cref="Exp2"/>" optionally prefixed by a '*'.
+        /// the "10^<see cref="Exp10"/>.2^<see cref="Exp2"/>" optionally prefixed by <paramref name="mult"/>.
         /// </summary>
-        /// <param name="withMultPrefix">True to prefix by '*' when <see cref="IsNeutral"/> is false.</param>
+        /// <param name="mult">Multipication character ('\0' for none, typically '*' or '.').</param>
         /// <returns>A readable string.</returns>
-        public string ToString( bool withMultPrefix )
+        public string ToString( char mult )
         {
             string s = String.Empty;
             if( Exp10 != 0 )
             {
-                s = (withMultPrefix ? "*10^" : "10^") + Exp10;
-                if( Exp2 != 0 ) s += "*2^" + Exp2;
+                s = (mult != '\0' ? mult + "10^" : "10^") + Exp10.ToString( CultureInfo.InvariantCulture );
+                if( Exp2 != 0 ) s += (mult == '\0' ? '.' : mult) + "2^" + Exp2.ToString( CultureInfo.InvariantCulture );
             }
-            else if( Exp2 != 0 ) s = (withMultPrefix ? "*2^" : "2^") + Exp2;
+            else if( Exp2 != 0 ) s = (mult != '\0' ? mult + "2^" : "2^") + Exp2.ToString( CultureInfo.InvariantCulture );
             return s;
         }
 
         /// <summary>
-        /// See <see cref="ToString(bool)"/> that is called with false (no multpilcation prefix).
+        /// See <see cref="ToString(bool)"/> that is called with false (no multiplication prefix).
         /// </summary>
         /// <returns>A readable string.</returns>
-        public override string ToString() => ToString( false );
+        public override string ToString() => ToString( '\0' );
 
         public override bool Equals( object obj ) => obj is ExpFactor f && Equals( f );
 

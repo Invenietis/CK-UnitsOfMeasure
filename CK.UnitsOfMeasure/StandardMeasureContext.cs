@@ -11,17 +11,17 @@ namespace CK.UnitsOfMeasure
         StandardMeasureContext( string name, bool isDefault )
             : base( name, isDefault )
         {
-            Unit = DefineFundamental( "#", "Unit" );
-            Metre = DefineFundamental( "m", "Metre" );
-            Gram = DefineFundamental( "g", "Gram", MeasureStandardPrefix.Kilo );
-            Second = DefineFundamental( "s", "Second" );
-            Ampere = DefineFundamental( "A", "Ampere" );
-            Kelvin = DefineFundamental( "K", "Kelvin" );
-            Mole = DefineFundamental( "mol", "Mole" );
-            Candela = DefineFundamental( "cd", "Candela" );
-            Bit = DefineFundamental( "b", "Bit" );
+            Unit = DefineFundamental( "#", "Unit", AutoStandardPrefix.Metric );
+            Metre = DefineFundamental( "m", "Metre", AutoStandardPrefix.Metric );
+            Gram = DefineFundamental( "g", "Gram", AutoStandardPrefix.Metric, MeasureStandardPrefix.Kilo );
+            Second = DefineFundamental( "s", "Second", AutoStandardPrefix.Metric );
+            Ampere = DefineFundamental( "A", "Ampere", AutoStandardPrefix.Metric );
+            Kelvin = DefineFundamental( "K", "Kelvin", AutoStandardPrefix.Metric );
+            Mole = DefineFundamental( "mol", "Mole", AutoStandardPrefix.Metric );
+            Candela = DefineFundamental( "cd", "Candela", AutoStandardPrefix.Metric );
+            Bit = DefineFundamental( "b", "Bit", AutoStandardPrefix.Both );
             Kilogram = (PrefixedMeasureUnit)this["kg"];
-            Byte = DefineAlias( "B", "Byte", new FullFactor( new ExpFactor( 3, 0 ) ), Bit );
+            Byte = DefineAlias( "B", "Byte", new FullFactor( new ExpFactor( 3, 0 ) ), Bit, AutoStandardPrefix.Both );
         }
 
         public StandardMeasureContext( string name )

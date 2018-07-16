@@ -52,16 +52,20 @@ namespace CK.UnitsOfMeasure
         /// Checks whether a new unit abbreviation can be defined in this context.
         /// </summary>
         /// <param name="a">The proposed abbreviation.</param>
+        /// <param name="autoStandardPrefix">
+        /// Whether the new unit must support automatic metric and/or binary standard prefixes.
+        /// </param>
         /// <returns>True if the abbreviation can be used, false otherwise.</returns>
-        public bool IsValidNewAbbreviation( string a )
+        public bool IsValidNewAbbreviation( string a, AutoStandardPrefix autoStandardPrefix )
         {
             if( String.IsNullOrEmpty( a )
-                || !a.All( c => Char.IsLetter( c ) || Char.IsSymbol( c ) || c == '#' ) )
+                || !a.All( c => Char.IsLetter( c ) || Char.IsSymbol( c )
+                || c == '#' || c == '%' || c == '‰' || c == '‱' || c == '㏙' ) )
             {
                 return false;
             }
-            foreach( var withPrefix in MeasureStandardPrefix.All
-                                            .Select( p => p.Abbreviation + a ) )
+            foreach( var withPrefix in MeasureStandardPrefix.GetPrefixes( autoStandardPrefix )
+                                                        .Select( p => p.Abbreviation + a ) )
             {
                 if( _allUnits.ContainsKey( withPrefix ) ) return false;
             }
@@ -73,8 +77,9 @@ namespace CK.UnitsOfMeasure
             if( prefix != MeasureStandardPrefix.None )
             {
                 return !_allUnits.Values
-                            .Where( u => u is FundamentalMeasureUnit || u is AliasMeasureUnit )
-                            .SelectMany( u => MeasureStandardPrefix.All
+                            .OfType<AtomicMeasureUnit>()
+                            .Where( u => u.AutoStandardPrefix != AutoStandardPrefix.None )
+                            .SelectMany( u => MeasureStandardPrefix.GetPrefixes( u.AutoStandardPrefix )
                                                 .Where( p => p != MeasureStandardPrefix.None )
                                                 .Select( p => p.Abbreviation + u.Abbreviation ) )
                             .Any( exists => exists == a );
@@ -96,15 +101,23 @@ namespace CK.UnitsOfMeasure
         /// Must not be <see cref="FullFactor.Zero"/>.
         /// </param>
         /// <param name="definition">The definition. Can be any <see cref="MeasureUnit"/>.</param>
+        /// <param name="autoStandardPrefix">
+        /// Whether standard metric and/or binary prefixes can be applied to the unit.
+        /// </param>
         /// <returns>The alias unit of measure.</returns>
-        public AliasMeasureUnit DefineAlias( string abbreviation, string name, FullFactor definitionFactor, MeasureUnit definition )
+        public AliasMeasureUnit DefineAlias(
+            string abbreviation,
+            string name,
+            FullFactor definitionFactor,
+            MeasureUnit definition,
+            AutoStandardPrefix autoStandardPrefix = AutoStandardPrefix.None )
         {
-            if( !IsValidNewAbbreviation( abbreviation ) ) throw new ArgumentException( $"Invalid abbreviation {abbreviation}.", nameof( abbreviation ) );
+            if( !IsValidNewAbbreviation( abbreviation, autoStandardPrefix ) ) throw new ArgumentException( $"Invalid abbreviation {abbreviation}.", nameof( abbreviation ) );
             if( String.IsNullOrWhiteSpace( name ) ) throw new ArgumentException( "Must not be null or white space.", nameof( name ) );
             if( definitionFactor.IsZero ) throw new ArgumentException( "Must not be zero.", nameof( definitionFactor ) );
             if( definition == null ) throw new ArgumentNullException( nameof( definition ) );
-            if( definition.Context != this ) throw new Exception( "Units' Context mismatch." );
-            return RegisterAlias( abbreviation, name, definitionFactor, definition );
+            if( definition != MeasureUnit.None && definition.Context != this ) throw new Exception( "Units' Context mismatch." );
+            return RegisterAlias( abbreviation, name, definitionFactor, definition, autoStandardPrefix );
         }
 
         /// <summary>
@@ -118,32 +131,56 @@ namespace CK.UnitsOfMeasure
         /// This is the key that is used. It must not be null or empty.
         /// </param>
         /// <param name="name">The full name. Must not be null or empty.</param>
+        /// <param name="autoStandardPrefix">
+        /// Whether standard metric and/or binary prefixes can be applied to the unit.
+        /// If a <paramref name="normalizedPrefix"/> is used, this must necessarily define the
+        /// corresponding prefix kind.
+        /// </param>
         /// <param name="normalizedPrefix">
         /// Optional prefix to be used for units where the normalized unit should not be the <see cref="FundamentalMeasureUnit"/> but one of its
         /// <see cref="PrefixedMeasureUnit"/>. This is the case for the "g"/"Gram" and the "kg"/"Kilogram".
         /// Defaults to <see cref="MeasureStandardPrefix.None"/>: by default a fundamental unit is the normalized one.
         /// </param>
         /// <returns>The fundamental unit of measure.</returns>
-        public FundamentalMeasureUnit DefineFundamental( string abbreviation, string name, MeasureStandardPrefix normalizedPrefix = null )
+        public FundamentalMeasureUnit DefineFundamental(
+            string abbreviation,
+            string name,
+            AutoStandardPrefix autoStandardPrefix = AutoStandardPrefix.None,
+            MeasureStandardPrefix normalizedPrefix = null )
         {
-            if( !IsValidNewAbbreviation( abbreviation ) ) throw new ArgumentException( $"Invalid abbreviation {abbreviation}.", nameof( abbreviation ) );
+            if( !IsValidNewAbbreviation( abbreviation, autoStandardPrefix ) ) throw new ArgumentException( $"Invalid abbreviation {abbreviation}.", nameof( abbreviation ) );
             if( String.IsNullOrWhiteSpace( name ) ) throw new ArgumentException( "Must not be null or white space.", nameof( name ) );
             if( normalizedPrefix == null || normalizedPrefix == MeasureStandardPrefix.None )
             {
-                return RegisterFundamental( abbreviation, name, true );
+                return RegisterFundamental( abbreviation, name, autoStandardPrefix, true );
             }
-            var f = RegisterFundamental( abbreviation, name, false );
+            if( normalizedPrefix.Base == 2 && (autoStandardPrefix & AutoStandardPrefix.Binary) == 0 )
+            {
+                throw new ArgumentException( $"Since the normalization is {normalizedPrefix.Name}, {abbreviation} unit must support AutoStandardPrefix.Binary.", nameof( autoStandardPrefix ) );
+            }
+            if( normalizedPrefix.Base == 10 && (autoStandardPrefix & AutoStandardPrefix.Metric) == 0 )
+            {
+                throw new ArgumentException( $"Since the normalization is {normalizedPrefix.Name}, {abbreviation} unit must support AutoStandardPrefix.Metric.", nameof( autoStandardPrefix ) );
+            }
+            var f = RegisterFundamental( abbreviation, name, autoStandardPrefix, false );
             f.SetPrefixedNormalization( RegisterPrefixed( ExpFactor.Neutral, normalizedPrefix, f, true ) );
             return f;
         }
 
-        AliasMeasureUnit RegisterAlias( string a, string n, FullFactor f, MeasureUnit d )
+        AliasMeasureUnit RegisterAlias( string a, string n, FullFactor f, MeasureUnit d, AutoStandardPrefix stdPrefix )
         {
+            if( d == MeasureUnit.None )
+            {
+                if( f.Factor != 1.0 ) throw new Exception( "Only exponential factor is allowed for dimensionless units." );
+                d = RegisterPrefixed( f.ExpFactor, MeasureStandardPrefix.None, MeasureUnit.None, false );
+                f = FullFactor.Neutral;
+            }
             return Register( abbreviation: a,
                                 name: n,
-                                creator: () => new AliasMeasureUnit( this, a, n, f, d ),
+                                creator: () => new AliasMeasureUnit( this, a, n, f, d, stdPrefix ),
                                 checker: m => m.Definition.Normalization == d.Normalization
-                                                && m.NormalizationFactor == d.NormalizationFactor.Multiply( f ) );
+                                                && m.NormalizationFactor == d.NormalizationFactor.Multiply( f )
+                                                && m.AutoStandardPrefix == stdPrefix );
         }
 
         internal MeasureUnit RegisterCombined( ExponentMeasureUnit[] units )
@@ -172,9 +209,11 @@ namespace CK.UnitsOfMeasure
             return Register( names.A, names.N, () => new PrefixedMeasureUnit( this, names, adjustment, p, u, isNormalized ?? false ), m => !isNormalized.HasValue || m.IsNormalized == isNormalized );
         }
 
-        FundamentalMeasureUnit RegisterFundamental( string abbreviation, string name, bool isNormalized )
+        FundamentalMeasureUnit RegisterFundamental( string abbreviation, string name, AutoStandardPrefix stdPrefix, bool isNormalized )
         {
-            return Register( abbreviation, name, () => new FundamentalMeasureUnit( this, abbreviation, name, isNormalized ), m => m.IsNormalized == isNormalized );
+            return Register( abbreviation, name,
+                             creator: () => new FundamentalMeasureUnit( this, abbreviation, name, stdPrefix, isNormalized ),
+                             checker: m => m.IsNormalized == isNormalized && m.AutoStandardPrefix == stdPrefix );
         }
 
         T Register<T>( string abbreviation, string name, Func<T> creator, Func<T, bool> checker )
