@@ -4,8 +4,14 @@ using System.Text;
 
 namespace CK.UnitsOfMeasure
 {
+    /// <summary>
+    /// Specialized <see cref="MeasureContext"/> that defines standard units.
+    /// </summary>
     public class StandardMeasureContext : MeasureContext
     {
+        /// <summary>
+        /// Exposes the default context singleton.
+        /// </summary>
         public static readonly StandardMeasureContext Default = new StandardMeasureContext( String.Empty, true );
 
         StandardMeasureContext( string name, bool isDefault )
@@ -24,6 +30,11 @@ namespace CK.UnitsOfMeasure
             Byte = DefineAlias( "B", "Byte", new FullFactor( new ExpFactor( 3, 0 ) ), Bit, AutoStandardPrefix.Both );
         }
 
+        /// <summary>
+        /// Initializes a new <see cref="StandardMeasureContext"/> with a name
+        /// that should uniquely identify this context.
+        /// </summary>
+        /// <param name="name">Name of this context. Must not be null or empty: the empty name is reserved for <see cref="Default"/>.</param>
         public StandardMeasureContext( string name )
             : this( name, false )
         {

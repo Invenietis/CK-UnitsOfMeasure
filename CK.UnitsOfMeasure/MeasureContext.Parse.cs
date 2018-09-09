@@ -17,8 +17,16 @@ namespace CK.UnitsOfMeasure
                                     | RegexOptions.CultureInvariant
                                     | RegexOptions.ExplicitCapture );
 
+        /// <summary>
+        /// Tries to parse a string as a <see cref="MeasureUnit"/> and registers it in this context
+        /// on success.
+        /// </summary>
+        /// <param name="s">The string to parse. Must not be null.</param>
+        /// <param name="u">On success, the unit of measure.</param>
+        /// <returns>True on success, false if the string can not be parsed as a measur of unit.</returns>
         public bool TryParse( string s, out MeasureUnit u )
         {
+            if( s == null ) throw new ArgumentNullException( nameof( s ) );
             // 1 - Normalize input by removing all white spaces.
             // Trust the Regex cache for this quite common one.
             s = Regex.Replace( s, "\\s+", String.Empty );

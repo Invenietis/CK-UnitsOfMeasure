@@ -44,12 +44,31 @@ namespace CK.UnitsOfMeasure
             }
         }
 
+        /// <summary>
+        /// Elevates this factor to a given power.
+        /// </summary>
+        /// <param name="p">The power.</param>
+        /// <returns>This factor elevated to <paramref name="p"/>.</returns>
         public ExpFactor Power( int p ) => new ExpFactor( Exp2 * p, Exp10 * p );
 
+        /// <summary>
+        /// Multplies this factor by another one.
+        /// </summary>
+        /// <param name="x">The factor.</param>
+        /// <returns>This factor multipied by <paramref name="x"/>.</returns>
         public ExpFactor Multiply( ExpFactor x ) => new ExpFactor( Exp2 + x.Exp2, Exp10 + x.Exp10 );
 
+        /// <summary>
+        /// Divides this factor by another one.
+        /// </summary>
+        /// <param name="x">The divisor.</param>
+        /// <returns>This factor divided by <paramref name="x"/>.</returns>
         public ExpFactor DivideBy( ExpFactor x ) => new ExpFactor( Exp2 - x.Exp2, Exp10 - x.Exp10 );
 
+        /// <summary>
+        /// Computes a double value.
+        /// </summary>
+        /// <returns>The double value.</returns>
         public double ToDouble() => Math.Pow( 2, Exp2 ) * Math.Pow( 10, Exp10 );
 
         /// <summary>
@@ -71,17 +90,37 @@ namespace CK.UnitsOfMeasure
         }
 
         /// <summary>
-        /// See <see cref="ToString(bool)"/> that is called with false (no multiplication prefix).
+        /// See <see cref="ToString(char)"/> that is called with no multiplication prefix (the '\0' character).
         /// </summary>
         /// <returns>A readable string.</returns>
         public override string ToString() => ToString( '\0' );
 
+        /// <summary>
+        /// Implements value semantic equality.
+        /// </summary>
+        /// <param name="obj">The other object.</param>
+        /// <returns>True if <paramref name="obj"/> is the same as this.</returns>
         public override bool Equals( object obj ) => obj is ExpFactor f && Equals( f );
 
+        /// <summary>
+        /// Implements value semantic equality.
+        /// </summary>
+        /// <param name="other">The other factor.</param>
+        /// <returns>True if <paramref name="other"/> is the same as this.</returns>
         public bool Equals( ExpFactor other ) => Exp2 == other.Exp2 && Exp10 == other.Exp10;
 
+        /// <summary>
+        /// Implements value semantic equality.
+        /// </summary>
+        /// <returns>The hash code based on <see cref="Exp10"/> and <see cref="Exp2"/>.</returns>
         public override int GetHashCode() => Exp10 << 7 ^ Exp2;
 
+        /// <summary>
+        /// Compares this factor to another one, <see cref="Exp10"/> being the primary
+        /// key.
+        /// </summary>
+        /// <param name="other">The other factor to compare to.</param>
+        /// <returns>Positive if this is greater than other, 0 if they are equal and negative otherwise.</returns>
         public int CompareTo( ExpFactor other )
         {
             int cmp = Exp10 - other.Exp10;

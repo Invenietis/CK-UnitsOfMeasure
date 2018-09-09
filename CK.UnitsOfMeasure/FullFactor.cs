@@ -5,7 +5,7 @@ using System.Text;
 namespace CK.UnitsOfMeasure
 {
     /// <summary>
-    /// Immutable struct that captures <see cref="Factor"/>.2^<see cref="Exp2"/>.10^<see cref="Exp10"/>.
+    /// Immutable struct that captures <see cref="Factor"/>.2^<see cref="ExpFactor.Exp2"/>.10^<see cref="ExpFactor.Exp10"/>.
     /// </summary>
     public readonly struct FullFactor : IEquatable<FullFactor>
     {
@@ -92,8 +92,16 @@ namespace CK.UnitsOfMeasure
         /// <returns>The resulting full factor.</returns>
         public FullFactor DivideBy( FullFactor x ) => new FullFactor( Factor / x.Factor, ExpFactor.DivideBy( x.ExpFactor ) );
 
+        /// <summary>
+        /// Computes the double value of this factor.
+        /// </summary>
+        /// <returns>The double value.</returns>
         public double ToDouble() => Factor * ExpFactor.ToDouble();
 
+        /// <summary>
+        /// Returns a textual representation of this factor.
+        /// </summary>
+        /// <returns>A readable string.</returns>
         public override string ToString()
         {
             if( IsNeutral ) return String.Empty;
