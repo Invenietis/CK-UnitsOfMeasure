@@ -24,6 +24,14 @@ namespace CK.UnitsOfMeasure
             Name = name;
         }
 
+        /// <summary>
+        /// Creates an empty <see cref="MeasureContext"/> with a name
+        /// that should uniquely identify this context.
+        /// </summary>
+        /// <param name="name">
+        /// Name of this context. Must not be null or empty: the empty name is reserved
+        /// for the <see cref="StandardMeasureContext.Default"/> default singleton context.
+        /// </param>
         public MeasureContext( string name )
             : this( name, false )
         {
@@ -59,8 +67,11 @@ namespace CK.UnitsOfMeasure
         public bool IsValidNewAbbreviation( string a, AutoStandardPrefix autoStandardPrefix )
         {
             if( String.IsNullOrEmpty( a )
-                || !a.All( c => Char.IsLetter( c ) || Char.IsSymbol( c )
-                || c == '#' || c == '%' || c == '‰' || c == '‱' || c == '㏙' ) )
+                || !a.All( c => Char.IsLetter( c )
+                                || Char.IsSymbol( c )
+                                || c == '#'
+                                || c == '%' || c == '‰' || c == '‱'
+                                || c == '㏙' ) )
             {
                 return false;
             }
@@ -122,8 +133,8 @@ namespace CK.UnitsOfMeasure
 
         /// <summary>
         /// Define a new fundamental unit of measure.
-        /// Just like <see cref="DefineAlias(string, string, FullFactor, MeasureUnit)"/>, the same fundamental unit
-        /// can be redefined multiple times as long as it is actually the same: for fundamental units, the <see cref="Name"/>
+        /// Just like <see cref="DefineAlias"/>, the same fundamental unit can be redefined multiple times
+        /// as long as it is actually the same: for fundamental units, the <see cref="Name"/>
         /// (and the normalizedPrefix if any) must be exaclty the same.
         /// </summary>
         /// <param name="abbreviation">

@@ -41,19 +41,19 @@ namespace CK.UnitsOfMeasure.Tests
         [Test]
         public void minute_and_inch_can_coexist_unless_inch_supports_metric_prefixes()
         {
-            var cWithMinute = new StandardMeasureContext( "WithMinute" );
-            var minute = cWithMinute.DefineAlias( "min", "Minute", new FullFactor( 60 ), cWithMinute.Second );
-            cWithMinute.IsValidNewAbbreviation( "in", AutoStandardPrefix.None ).Should().BeTrue();
-            cWithMinute.IsValidNewAbbreviation( "in", AutoStandardPrefix.Binary ).Should().BeTrue();
-            cWithMinute.IsValidNewAbbreviation( "in", AutoStandardPrefix.Metric ).Should().BeFalse();
+            var cM = new StandardMeasureContext( "WithMinute" );
+            var minute = cM.DefineAlias( "min", "Minute", new FullFactor( 60 ), cM.Second );
+            cM.IsValidNewAbbreviation( "in", AutoStandardPrefix.None ).Should().BeTrue();
+            cM.IsValidNewAbbreviation( "in", AutoStandardPrefix.Binary ).Should().BeTrue();
+            cM.IsValidNewAbbreviation( "in", AutoStandardPrefix.Metric ).Should().BeFalse();
 
-            var cWithInchMetric = new StandardMeasureContext( "WithInchMetric" );
-            var inch = cWithInchMetric.DefineAlias( "in",
+            var cI = new StandardMeasureContext( "WithInchMetric" );
+            var inch = cI.DefineAlias( "in",
                                                     "Inch",
                                                     2.54,
-                                                    MeasureStandardPrefix.Centi[cWithInchMetric.Metre],
+                                                    MeasureStandardPrefix.Centi[cI.Metre],
                                                     AutoStandardPrefix.Metric );
-            cWithInchMetric.IsValidNewAbbreviation( "min", AutoStandardPrefix.None ).Should().BeFalse();
+            cI.IsValidNewAbbreviation( "min", AutoStandardPrefix.None ).Should().BeFalse();
         }
 
         [Test]

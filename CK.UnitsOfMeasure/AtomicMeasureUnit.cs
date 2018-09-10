@@ -22,6 +22,9 @@ namespace CK.UnitsOfMeasure
             AutoStandardPrefix = stdPrefix;
         }
 
+        /// <summary>
+        /// Gets the <see cref="AutoStandardPrefix"/> configuration of this measure.
+        /// </summary>
         public AutoStandardPrefix AutoStandardPrefix { get; }
 
         /// <summary>

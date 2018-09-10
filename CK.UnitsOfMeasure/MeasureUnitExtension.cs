@@ -4,6 +4,9 @@ using System.Text;
 
 namespace CK.UnitsOfMeasure
 {
+    /// <summary>
+    /// Provides extension methods to int and double.
+    /// </summary>
     public static class MeasureUnitExtension
     {
         /// <summary>
