@@ -41,8 +41,17 @@ namespace CK.UnitsOfMeasure
         /// </summary>
         public ExpFactor Factor { get; }
 
+        /// <summary>
+        /// Returs the <see cref="Abbreviation"/> or the Abbreviation followed by (<see cref="Name"/>, <see cref="Factor"/>).
+        /// </summary>
+        /// <param name="withName">True if name and factor should be added.</param>
+        /// <returns>The readable string.</returns>
         public string ToString( bool withName ) => withName ? $"{Abbreviation} ({Name}, {Factor})" : Abbreviation;
 
+        /// <summary>
+        /// Simply returns the <see cref="Abbreviation"/>.
+        /// </summary>
+        /// <returns>The abbreviation.</returns>
         public override string ToString() => Abbreviation;
 
         MeasureStandardPrefix( string abbreviation, string name, int eBase, int exp )
@@ -211,6 +220,7 @@ namespace CK.UnitsOfMeasure
         /// </summary>
         public static readonly MeasureStandardPrefix None;
 
+#pragma warning disable 1591
         public static readonly MeasureStandardPrefix Yotta;
         public static readonly MeasureStandardPrefix Zetta;
         public static readonly MeasureStandardPrefix Exa;
@@ -240,6 +250,7 @@ namespace CK.UnitsOfMeasure
         public static readonly MeasureStandardPrefix Gibi;
         public static readonly MeasureStandardPrefix Mebi;
         public static readonly MeasureStandardPrefix Kibi;
+#pragma warning restore 1591
 
         /// <summary>
         /// Gets a prefix by its abbreviation or name.

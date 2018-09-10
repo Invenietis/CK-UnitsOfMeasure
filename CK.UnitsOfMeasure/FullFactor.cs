@@ -68,9 +68,6 @@ namespace CK.UnitsOfMeasure
         {
         }
 
-        public static implicit operator FullFactor( double d ) => new FullFactor( d );
-        public static implicit operator FullFactor( ExpFactor e ) => new FullFactor( e );
-
         /// <summary>
         /// Returns this factor elevated to a given power.
         /// </summary>
@@ -110,14 +107,34 @@ namespace CK.UnitsOfMeasure
             return Factor.ToString() + ExpFactor.ToString( '*' );
         }
 
+#pragma warning disable 1591
+        public static implicit operator FullFactor( double d ) => new FullFactor( d );
+
+        public static implicit operator FullFactor( ExpFactor e ) => new FullFactor( e );
+
         public static bool operator ==( FullFactor f1, FullFactor f2 ) => f1.Equals( f2 );
 
         public static bool operator !=( FullFactor f1, FullFactor f2 ) => !f1.Equals( f2 );
+#pragma warning restore 1591
 
+        /// <summary>
+        /// Overridden to support value equality semantic.
+        /// </summary>
+        /// <param name="obj">The other object.</param>
+        /// <returns>True if this full factor is the same as the other one. False otherwise.</returns>
         public override bool Equals( object obj ) => obj is FullFactor f && Equals( f );
 
+        /// <summary>
+        /// Implements value equality semantic.
+        /// </summary>
+        /// <param name="other">The other factor.</param>
+        /// <returns>True if this full factor is the same as the other one. False otherwise.</returns>
         public bool Equals( FullFactor other ) => Factor == other.Factor && ExpFactor.Equals( other.ExpFactor );
 
+        /// <summary>
+        /// Combine <see cref="Factor"/> and <see cref="ExpFactor"/> hash codes.
+        /// </summary>
+        /// <returns>The hash code for this full factor.</returns>
         public override int GetHashCode() => Factor.GetHashCode() ^ ExpFactor.GetHashCode();
 
     }
