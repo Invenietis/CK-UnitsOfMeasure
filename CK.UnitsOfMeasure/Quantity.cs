@@ -138,6 +138,7 @@ namespace CK.UnitsOfMeasure
             }
         }
 
+#pragma warning disable 1591
         public static Quantity operator /( Quantity o1, Quantity o2 ) => o1.DivideBy( o2 );
         public static Quantity operator *( Quantity o1, Quantity o2 ) => o1.Multiply( o2 );
         public static Quantity operator ^( Quantity o, int exp ) => o.Power( exp );
@@ -154,6 +155,7 @@ namespace CK.UnitsOfMeasure
         public static bool operator <( Quantity o1, Quantity o2 ) => o1.CompareTo( o2 ) < 0;
         public static bool operator >=( Quantity o1, Quantity o2 ) => o1.CompareTo( o2 ) >= 0;
         public static bool operator <=( Quantity o1, Quantity o2 ) => o1.CompareTo( o2 ) <= 0;
+#pragma warning restore 1591
 
         /// <summary>
         /// Get this string representation of this <see cref="Value"/> with this <see cref="Unit"/>.

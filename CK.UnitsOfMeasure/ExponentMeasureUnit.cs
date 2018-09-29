@@ -42,7 +42,7 @@ namespace CK.UnitsOfMeasure
         /// </summary>
         public AtomicMeasureUnit AtomicMeasureUnit { get; }
 
-        public static (string A, string N) ComputeNames( int exp, AtomicMeasureUnit u )
+        internal static (string A, string N) ComputeNames( int exp, AtomicMeasureUnit u )
         {
             if( exp == 1 ) return (u.Abbreviation, u.Name);
             string e = exp.ToString();

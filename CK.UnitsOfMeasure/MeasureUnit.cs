@@ -227,8 +227,8 @@ namespace CK.UnitsOfMeasure
 
         /// <summary>
         /// Define a new fundamental unit of measure.
-        /// Just like <see cref="DefineAlias(string, string, FullFactor, MeasureUnit)"/>, the same fundamental unit
-        /// can be redefined multiple times as long as it is actually the same: for fundamental units, the <see cref="Name"/>
+        /// Just like <see cref="DefineAlias"/>, the same fundamental unit can be redefined multiple times
+        /// as long as it is actually the same: for fundamental units, the <see cref="Name"/>
         /// (and the normalizedPrefix if any) must be exaclty the same.
         /// </summary>
         /// <param name="abbreviation">
@@ -256,9 +256,11 @@ namespace CK.UnitsOfMeasure
             return StandardMeasureContext.Default.DefineFundamental( abbreviation, name, autoStandardPrefix, normalizedPrefix );
         }
 
+#pragma warning disable 1591
         public static MeasureUnit operator /( MeasureUnit o1, MeasureUnit o2 ) => o1.DivideBy( o2 );
         public static MeasureUnit operator *( MeasureUnit o1, MeasureUnit o2 ) => o1.Multiply( o2 );
         public static MeasureUnit operator ^( MeasureUnit o, int exp ) => o.Power( exp );
+#pragma warning restore 1591
 
         /// <summary>
         /// Returns the abbreviation optionally suffixed with its " (<see cref="Name"/>)".
