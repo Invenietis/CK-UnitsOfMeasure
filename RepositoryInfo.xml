@@ -1,7 +1,8 @@
 <RepositoryInfo xmlns="http://csemver.org/schemas/2015">
   <StartingVersionForCSemVer>v0.1.0-alpha</StartingVersionForCSemVer>
-  <PossibleVersionsMode>AllSuccessors</PossibleVersionsMode>
+
   <Branches>
     <Branch Name="develop" VersionName="develop" CIVersionMode="LastReleaseBased" />
+    <Branch Name="develop-local" VersionName="local" CIVersionMode="LastReleaseBased" />
   </Branches>
 </RepositoryInfo>
