@@ -1,7 +1,7 @@
 
 version: build{build}
 image: Visual Studio 2017
-clone_folder: C:\CK-World\CK-Core-Projects\CK-UnitsOfMeasure
+clone_folder: C:\CKli-World\CK-Core-Projects\CK-UnitsOfMeasure
 branches:
   only:
     - master
