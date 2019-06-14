@@ -11,9 +11,6 @@
     <PackageReference Include="NUnit3TestAdapter" Version="3.13.0" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Properties\" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\..\CK.UnitsOfMeasure\CK.UnitsOfMeasure.csproj" />
   </ItemGroup>
   <ItemGroup>
