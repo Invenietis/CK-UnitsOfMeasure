@@ -605,7 +605,6 @@ namespace CodeCake
 
             protected override string ResolveAPIKey() => null;
         }
-
     }
 }
 
