@@ -1,1 +1,0 @@
-C:/Dev/CK/CK-Core-Projects/CK-UnitsOfMeasure/Tests/CK.UnitsOfMeasure.Tests/bin/Debug/net461/CK.UnitsOfMeasure.Tests.dll
