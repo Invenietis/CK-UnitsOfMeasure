@@ -12,8 +12,7 @@ environment:
 build_script:
   - dotnet run --project CodeCakeBuilder -nointeraction
 test: off
-install:
-  - ps: ./CodeCakeBuilder/InstallCredentialProvider.ps1
+install: []
 artifacts:
   - path: '**\*.log'
     name: Log file
