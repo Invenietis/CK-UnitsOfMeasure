@@ -133,7 +133,11 @@ namespace CodeCake
                 string assetsJson = File.ReadAllText( objDir.AppendPart( "project.assets.json" ) );
                 bool isNunitLite = assetsJson.Contains( "NUnitLite" );
                 bool isVSTest = assetsJson.Contains( "Microsoft.NET.Test.Sdk" );
-                foreach( NormalizedPath buildDir in Directory.GetDirectories( binDir ) )
+                foreach( NormalizedPath buildDir in
+                    Directory.GetDirectories( binDir )
+                        .Where( p => Directory.EnumerateFiles( p )
+                        .Any() )
+                )
                 {
                     string framework = buildDir.LastPart;
                     string fileWithoutExtension = buildDir.AppendPart( project.Name );
