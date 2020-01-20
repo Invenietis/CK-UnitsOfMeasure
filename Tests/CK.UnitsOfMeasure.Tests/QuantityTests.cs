@@ -129,8 +129,8 @@ namespace CK.UnitsOfMeasure.Tests
 
             dm101.Equals( dam1Dot01 ).Should().BeTrue();
             dam1Dot01.Equals( dm101 ).Should().BeTrue();
-            dm101.ConvertTo( metre ).ToString( CultureInfo.InvariantCulture ).Should().Be( "10.1 m" );
-            dam1Dot01.ConvertTo( metre ).ToString( CultureInfo.InvariantCulture ).Should().Be( "10.1 m" );
+            dm101.ConvertTo( metre ).ToRoundedString().Should().Be( "10.1 m" );
+            dam1Dot01.ConvertTo( metre ).ToRoundedString().Should().Be( "10.1 m" );
 
             dm101.GetHashCode().Should().Be( dam1Dot01.GetHashCode() );
         }
@@ -152,8 +152,8 @@ namespace CK.UnitsOfMeasure.Tests
 
             dg101.Equals( dag1Dot01 ).Should().BeTrue();
             dag1Dot01.Equals( dg101 ).Should().BeTrue();
-            dg101.ConvertTo( gram ).ToString( CultureInfo.InvariantCulture ).Should().Be( "10.1 g" );
-            dag1Dot01.ConvertTo( gram ).ToString( CultureInfo.InvariantCulture ).Should().Be( "10.1 g" );
+            dg101.ConvertTo( gram ).ToRoundedString().Should().Be( "10.1 g" );
+            dag1Dot01.ConvertTo( gram ).ToRoundedString().Should().Be( "10.1 g" );
 
             dg101.GetHashCode().Should().Be( dag1Dot01.GetHashCode() );
             dg101.ToNormalizedString().Should().Be( "0.0101 kg" );

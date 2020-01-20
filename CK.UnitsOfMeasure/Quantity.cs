@@ -10,6 +10,15 @@ namespace CK.UnitsOfMeasure
     /// </summary>
     public struct Quantity : IEquatable<Quantity>, IComparable<Quantity>
     {
+        /// <summary>
+        /// This is the "G15" format used when calling <see cref="Double.ToString(string, IFormatProvider)"/> (with the <see cref="CultureInfo.InvariantCulture"/>)
+        /// to obtain a string where small rounding adjustments are erased.
+        /// <para>The float formatting has changed with .Net Core 3.0 - see https://devblogs.microsoft.com/dotnet/floating-point-parsing-and-formatting-improvements-in-net-core-3-0/ -
+        /// so that the ToString is now "roundtrippable" by default.
+        /// The "G15" format is the previous default one that worked perfectly well for our "equality".</para>
+        /// </summary>
+        public const string ValueRoundedFormat = "G15";
+
         readonly MeasureUnit _unit;
 
         /// <summary>
@@ -160,6 +169,26 @@ namespace CK.UnitsOfMeasure
         /// <summary>
         /// Get this string representation of this <see cref="Value"/> with this <see cref="Unit"/>.
         /// </summary>
+        /// <param name="format">A numeric format string.</param>
+        /// <param name="provider">The format provider.</param>
+        /// <returns>A readable string.</returns>
+        public string ToString( string format, IFormatProvider provider ) => Value.ToString( format, provider )
+                                                                              + (Unit != MeasureUnit.None
+                                                                                 ? " " + Unit.Abbreviation
+                                                                                 : String.Empty);
+
+        /// <summary>
+        /// Get this string representation of this <see cref="Value"/> with this <see cref="Unit"/>,
+        /// using <see cref="ValueRoundedFormat"/> and <see cref="CultureInfo.InvariantCulture"/>.
+        /// </summary>
+        /// <param name="format">A numeric format string.</param>
+        /// <param name="provider">The format provider.</param>
+        /// <returns>A readable string.</returns>
+        public string ToRoundedString() => ToString( "G15", CultureInfo.InvariantCulture );
+
+        /// <summary>
+        /// Get this string representation of this <see cref="Value"/> with this <see cref="Unit"/>.
+        /// </summary>
         /// <param name="provider">The format provider.</param>
         /// <returns>A readable string.</returns>
         public string ToString( IFormatProvider provider ) => Value.ToString( provider )
@@ -177,15 +206,15 @@ namespace CK.UnitsOfMeasure
                                                     : String.Empty);
 
         /// <summary>
-        /// Returns the string representation of this quantity in this <see cref="Unit"/>'s <see cref="MeasureUnit.Normalization"/>
-        /// unit and <see cref="CultureInfo.InvariantCulture"/>.
+        /// Returns the <see cref="ToRoundedString()"/> representation of this quantity in
+        /// this <see cref="Unit"/>'s <see cref="MeasureUnit.Normalization"/>.
         /// </summary>
         /// <returns>A readable string.</returns>
         public string ToNormalizedString()
         {
             if( _normalized == null )
             {
-                _normalized = Unit == null ? "0" : ConvertTo( Unit.Normalization ).ToString( CultureInfo.InvariantCulture );
+                _normalized = Unit == null ? "0" : ConvertTo( Unit.Normalization ).ToRoundedString();
             }
             return _normalized;
         }
