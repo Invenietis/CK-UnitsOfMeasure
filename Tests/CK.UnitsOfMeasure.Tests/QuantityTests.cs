@@ -250,5 +250,28 @@ namespace CK.UnitsOfMeasure.Tests
             pc10OfKm100.ConvertTo( km ).ToString().Should().Be( "10 km" );
         }
 
+        /// <summary>
+        /// Big thanks to Dave Hary (https://www.codeproject.com/script/Membership/View.aspx?mid=284040): dimensionless "units"
+        /// are convertible into each other.
+        /// </summary>
+        [Test]
+        public void percent_or_other_dimensionless_units_are_convertible_into_each_other()
+        {
+            var percent = MeasureUnit.DefineAlias( "%", "Percent", new ExpFactor( 0, -2 ), MeasureUnit.None );
+            var pc10 = 10.WithUnit( percent );
+            pc10.ToString().Should().Be( "10 %" );
+            pc10.CanConvertTo( MeasureUnit.None ).Should().Be( true, $"{percent.Name} should be convertible to {MeasureUnit.None.Name}" );
+
+            var noDimension = pc10.ConvertTo( MeasureUnit.None );
+            noDimension.Unit.Should().Be( MeasureUnit.None );
+            noDimension.Value.Should().Be( 0.01 * pc10.Value, $"is {pc10.ToString()}" );
+
+            // Now, express the ratio in permille.
+            var permille = MeasureUnit.DefineAlias( "‰", "Permille", new ExpFactor( 0, -3 ), MeasureUnit.None );
+            noDimension.CanConvertTo( permille ).Should().BeTrue();
+            var inPerMille = noDimension.ConvertTo( permille );
+            inPerMille.Unit.Should().Be( permille );
+            inPerMille.Value.Should().Be( 10 * pc10.Value, $"is {pc10.ToString()}" );
+        }
     }
 }

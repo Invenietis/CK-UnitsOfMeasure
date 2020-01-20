@@ -114,9 +114,8 @@ namespace CK.UnitsOfMeasure
         {
             var o = Unit;
             return o == u
-                   || (o.Context == u.Context
-                       && (o.Normalization == u.Normalization
-                           || o.Normalization == u.Normalization.Invert()));
+                   || o.Normalization == u.Normalization
+                   || o.Normalization == u.Normalization.Invert();
         }
 
         /// <summary>
