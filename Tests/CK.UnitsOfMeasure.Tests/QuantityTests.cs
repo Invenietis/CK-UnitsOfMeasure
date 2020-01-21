@@ -273,5 +273,24 @@ namespace CK.UnitsOfMeasure.Tests
             inPerMille.Unit.Should().Be( permille );
             inPerMille.Value.Should().Be( 10 * pc10.Value, $"is {pc10.ToString()}" );
         }
+
+        /// <summary>
+        /// Big thanks to Dave Hary (https://www.codeproject.com/script/Membership/View.aspx?mid=284040) for having
+        /// spotted this!
+        /// </summary>
+        [Test]
+        public void combining_same_dimension_leads_to_dimensionless_quantities()
+        {
+            var ratio = (1.WithUnit( MeasureUnit.Kilogram ) / 1.WithUnit( MeasureUnit.Gram ));
+
+            ratio.Unit.Normalization.Should().Be( MeasureUnit.None, $"{MeasureUnit.Kilogram } / {MeasureUnit.Gram} is dimensionless" );
+
+            ratio.CanConvertTo( MeasureUnit.None ).Should().Be( true, $"{MeasureUnit.Kilogram } / {MeasureUnit.Gram} is dimensionless" );
+
+            var pureRatio = ratio.ConvertTo( MeasureUnit.None );
+
+            pureRatio.Value.Should().Be( 1000 );
+        }
+
     }
 }
