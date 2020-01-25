@@ -39,15 +39,15 @@ namespace CK.UnitsOfMeasure
 
         /// <summary>
         /// The kilogram is the unit of mass; it is equal to the mass of the international prototype of the kilogram.
-        /// This is the only SI base unit that incluedes a prefix. To avoid coping with this exception in the code, we
+        /// This is the only SI base unit that includes a prefix. To avoid coping with this exception in the code, we
         /// define it as a <see cref="PrefixedMeasureUnit"/> based on the gram (<see cref="MeasureStandardPrefix.Kilo"/>
-        /// of <see cref="Gram"/>) .
+        /// of <see cref="Gram"/>). This Kilogram is the normalized unit of mass.
         /// Associated abbreviation is "kg".
         /// </summary>
         public static PrefixedMeasureUnit Kilogram => StandardMeasureContext.Default.Kilogram;
 
         /// <summary>
-        /// The gram is our fundamental unit of mass (see <see cref="Kilogram"/>).
+        /// The gram is a fundamental unit of mass but not the normalized one: the <see cref="Kilogram"/> is the SI base unit.
         /// Associated abbreviation is "g".
         /// </summary>
         public static FundamentalMeasureUnit Gram => StandardMeasureContext.Default.Gram;

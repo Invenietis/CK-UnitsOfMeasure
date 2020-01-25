@@ -238,10 +238,10 @@ namespace CK.UnitsOfMeasure.Tests
             var pt30 = 30.WithUnit( pertenthousand );
             pt30.ToString().Should().Be( "30 ‱" );
 
-            (pc10 * pm20 * pt30).ToString().Should().Be("6000 10^-9");
+            (pc10 * pm20 * pt30).ToString().Should().Be( "6000 10^-9" );
 
             (pc10 + pm20 + pt30).ToString( CultureInfo.InvariantCulture ).Should().Be( "12.3 %" );
-            (pt30  + pc10 + pm20).ToString( CultureInfo.InvariantCulture ).Should().Be( "1230 ‱" );
+            (pt30 + pc10 + pm20).ToString( CultureInfo.InvariantCulture ).Should().Be( "1230 ‱" );
 
             var km = MeasureStandardPrefix.Kilo[MeasureUnit.Metre];
             var km100 = 100.WithUnit( MeasureStandardPrefix.Kilo[MeasureUnit.Metre] );
@@ -292,5 +292,20 @@ namespace CK.UnitsOfMeasure.Tests
             pureRatio.Value.Should().Be( 1000 );
         }
 
+        [Test]
+        public void automatic_unit_simplification_impacts_the_value()
+        {
+            var q = 5.WithUnit( MeasureUnit.Kilogram ) * 7.WithUnit( MeasureUnit.Gram );
+            q.ToString().Should().Be( "35 g.kg" );
+
+            q.Unit.Normalization.Should().Be( MeasureUnit.Kilogram * MeasureUnit.Kilogram );
+            q.Unit.NormalizationFactor.Should().Be( new ExpFactor( 0, -3 ) );
+
+            var qkg = q.ConvertTo( MeasureUnit.Kilogram * MeasureUnit.Kilogram );
+            qkg.Value.Should().Be( 35.0 / 1000 );
+            
+            var qg = q.ConvertTo( MeasureUnit.Gram * MeasureUnit.Gram );
+            qg.Value.Should().Be( 35.0 * 1000 );
+        }
     }
 }
