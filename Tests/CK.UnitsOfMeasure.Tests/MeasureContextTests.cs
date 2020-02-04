@@ -62,8 +62,9 @@ namespace CK.UnitsOfMeasure.Tests
             c.Invoking( x => x.DefineAlias( "ktg", "NotThing", 2.0, c.Unit ) )
                 .Should().Throw<ArgumentException>().WithMessage( "*new name 'NotThing' differ from 'Thing'." );
 
+            // Use ? at the comma position to handle comma or dot decimal separator.
             c.Invoking( x => x.DefineAlias( "ktg", "Thing", 2.5, c.Unit ) )
-                .Should().Throw<ArgumentException>().WithMessage( "*new normalization factor '2,5' should be '2'." );
+                .Should().Throw<ArgumentException>().WithMessage( "*new normalization factor '2?5' should be '2'." );
 
             var xtg = c.DefineAlias( "XTG", "2.5xThing", 2.5, c.Unit );
             c.DefineAlias( "XXTG", "2xXTG=5*Thing", 2.0, xtg );
