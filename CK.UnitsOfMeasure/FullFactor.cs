@@ -115,6 +115,14 @@ namespace CK.UnitsOfMeasure
         public static bool operator ==( FullFactor f1, FullFactor f2 ) => f1.Equals( f2 );
 
         public static bool operator !=( FullFactor f1, FullFactor f2 ) => !f1.Equals( f2 );
+
+        public static bool operator ==( FullFactor f1, ExpFactor e2 ) => f1.Equals( e2 );
+
+        public static bool operator !=( FullFactor f1, ExpFactor e2 ) => !f1.Equals( e2 );
+
+        public static bool operator ==( ExpFactor e1, FullFactor f2 ) => f2.Equals( e1 );
+
+        public static bool operator !=( ExpFactor e1, FullFactor f2 ) => !f2.Equals( e1 );
 #pragma warning restore 1591
 
         /// <summary>
@@ -122,7 +130,8 @@ namespace CK.UnitsOfMeasure
         /// </summary>
         /// <param name="obj">The other object.</param>
         /// <returns>True if this full factor is the same as the other one. False otherwise.</returns>
-        public override bool Equals( object obj ) => obj is FullFactor f && Equals( f );
+        public override bool Equals( object obj ) => obj is FullFactor f && Equals( f )
+                                                     || obj is ExpFactor e && Equals( e );
 
         /// <summary>
         /// Implements value equality semantic.
@@ -132,7 +141,14 @@ namespace CK.UnitsOfMeasure
         public bool Equals( FullFactor other ) => Factor == other.Factor && ExpFactor.Equals( other.ExpFactor );
 
         /// <summary>
-        /// Combine <see cref="Factor"/> and <see cref="ExpFactor"/> hash codes.
+        /// <see cref="Factor"/> must be 1.0 and then <see cref="ExpFactor"/> must be equal to <paramref name="other"/>.
+        /// </summary>
+        /// <param name="other">The other factor.</param>
+        /// <returns>True if factor is 1.0 ExpFactor equals other. False otherwise.</returns>
+        public bool Equals( ExpFactor other ) => Factor == 1.0 && ExpFactor.Equals( other );
+
+        /// <summary>
+        /// Combines <see cref="Factor"/> and <see cref="ExpFactor"/> hash codes.
         /// </summary>
         /// <returns>The hash code for this full factor.</returns>
         public override int GetHashCode() => Factor.GetHashCode() ^ ExpFactor.GetHashCode();

@@ -129,8 +129,8 @@ namespace CK.UnitsOfMeasure.Tests
 
             dm101.Equals( dam1Dot01 ).Should().BeTrue();
             dam1Dot01.Equals( dm101 ).Should().BeTrue();
-            dm101.ConvertTo( metre ).ToString( CultureInfo.InvariantCulture ).Should().Be( "10.1 m" );
-            dam1Dot01.ConvertTo( metre ).ToString( CultureInfo.InvariantCulture ).Should().Be( "10.1 m" );
+            dm101.ConvertTo( metre ).ToRoundedString().Should().Be( "10.1 m" );
+            dam1Dot01.ConvertTo( metre ).ToRoundedString().Should().Be( "10.1 m" );
 
             dm101.GetHashCode().Should().Be( dam1Dot01.GetHashCode() );
         }
@@ -152,8 +152,8 @@ namespace CK.UnitsOfMeasure.Tests
 
             dg101.Equals( dag1Dot01 ).Should().BeTrue();
             dag1Dot01.Equals( dg101 ).Should().BeTrue();
-            dg101.ConvertTo( gram ).ToString( CultureInfo.InvariantCulture ).Should().Be( "10.1 g" );
-            dag1Dot01.ConvertTo( gram ).ToString( CultureInfo.InvariantCulture ).Should().Be( "10.1 g" );
+            dg101.ConvertTo( gram ).ToRoundedString().Should().Be( "10.1 g" );
+            dag1Dot01.ConvertTo( gram ).ToRoundedString().Should().Be( "10.1 g" );
 
             dg101.GetHashCode().Should().Be( dag1Dot01.GetHashCode() );
             dg101.ToNormalizedString().Should().Be( "0.0101 kg" );
@@ -238,10 +238,10 @@ namespace CK.UnitsOfMeasure.Tests
             var pt30 = 30.WithUnit( pertenthousand );
             pt30.ToString().Should().Be( "30 ‱" );
 
-            (pc10 * pm20 * pt30).ToString().Should().Be("6000 10^-9");
+            (pc10 * pm20 * pt30).ToString().Should().Be( "6000 10^-9" );
 
             (pc10 + pm20 + pt30).ToString( CultureInfo.InvariantCulture ).Should().Be( "12.3 %" );
-            (pt30  + pc10 + pm20).ToString( CultureInfo.InvariantCulture ).Should().Be( "1230 ‱" );
+            (pt30 + pc10 + pm20).ToString( CultureInfo.InvariantCulture ).Should().Be( "1230 ‱" );
 
             var km = MeasureStandardPrefix.Kilo[MeasureUnit.Metre];
             var km100 = 100.WithUnit( MeasureStandardPrefix.Kilo[MeasureUnit.Metre] );
@@ -250,5 +250,62 @@ namespace CK.UnitsOfMeasure.Tests
             pc10OfKm100.ConvertTo( km ).ToString().Should().Be( "10 km" );
         }
 
+        /// <summary>
+        /// Big thanks to Dave Hary (https://www.codeproject.com/script/Membership/View.aspx?mid=284040): dimensionless "units"
+        /// are convertible into each other.
+        /// </summary>
+        [Test]
+        public void percent_or_other_dimensionless_units_are_convertible_into_each_other()
+        {
+            var percent = MeasureUnit.DefineAlias( "%", "Percent", new ExpFactor( 0, -2 ), MeasureUnit.None );
+            var pc10 = 10.WithUnit( percent );
+            pc10.ToString().Should().Be( "10 %" );
+            pc10.CanConvertTo( MeasureUnit.None ).Should().Be( true, $"{percent.Name} should be convertible to {MeasureUnit.None.Name}" );
+
+            var noDimension = pc10.ConvertTo( MeasureUnit.None );
+            noDimension.Unit.Should().Be( MeasureUnit.None );
+            noDimension.Value.Should().Be( 0.01 * pc10.Value, $"is {pc10.ToString()}" );
+
+            // Now, express the ratio in permille.
+            var permille = MeasureUnit.DefineAlias( "‰", "Permille", new ExpFactor( 0, -3 ), MeasureUnit.None );
+            noDimension.CanConvertTo( permille ).Should().BeTrue();
+            var inPerMille = noDimension.ConvertTo( permille );
+            inPerMille.Unit.Should().Be( permille );
+            inPerMille.Value.Should().Be( 10 * pc10.Value, $"is {pc10.ToString()}" );
+        }
+
+        /// <summary>
+        /// Big thanks to Dave Hary (https://www.codeproject.com/script/Membership/View.aspx?mid=284040) for having
+        /// spotted this!
+        /// </summary>
+        [Test]
+        public void combining_same_dimension_leads_to_dimensionless_quantities()
+        {
+            var ratio = (1.WithUnit( MeasureUnit.Kilogram ) / 1.WithUnit( MeasureUnit.Gram ));
+
+            ratio.Unit.Normalization.Should().Be( MeasureUnit.None, $"{MeasureUnit.Kilogram } / {MeasureUnit.Gram} is dimensionless" );
+
+            ratio.CanConvertTo( MeasureUnit.None ).Should().Be( true, $"{MeasureUnit.Kilogram } / {MeasureUnit.Gram} is dimensionless" );
+
+            var pureRatio = ratio.ConvertTo( MeasureUnit.None );
+
+            pureRatio.Value.Should().Be( 1000 );
+        }
+
+        [Test]
+        public void automatic_unit_simplification_impacts_the_value()
+        {
+            var q = 5.WithUnit( MeasureUnit.Kilogram ) * 7.WithUnit( MeasureUnit.Gram );
+            q.ToString().Should().Be( "35 g.kg" );
+
+            q.Unit.Normalization.Should().Be( MeasureUnit.Kilogram * MeasureUnit.Kilogram );
+            q.Unit.NormalizationFactor.Should().Be( new ExpFactor( 0, -3 ) );
+
+            var qkg = q.ConvertTo( MeasureUnit.Kilogram * MeasureUnit.Kilogram );
+            qkg.Value.Should().Be( 35.0 / 1000 );
+            
+            var qg = q.ConvertTo( MeasureUnit.Gram * MeasureUnit.Gram );
+            qg.Value.Should().Be( 35.0 * 1000 );
+        }
     }
 }

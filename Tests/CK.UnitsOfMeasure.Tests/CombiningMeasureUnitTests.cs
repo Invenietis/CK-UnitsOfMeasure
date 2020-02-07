@@ -147,5 +147,26 @@ namespace CK.UnitsOfMeasure.Tests
             lux.Abbreviation.Should().Be( "cd.m-2" );
 
         }
+
+        [Test]
+        public void combining_same_dimension()
+        {
+            var metre = MeasureUnit.Metre;
+            var decimetre = MeasureStandardPrefix.Deci[ metre ];
+            var centimetre = MeasureStandardPrefix.Centi[ metre ];
+
+            var r10 = metre.DivideBy( decimetre );
+            r10.Normalization.Should().Be( MeasureUnit.None );
+            r10.NormalizationFactor.Factor.Should().Be( 1.0 );
+            r10.NormalizationFactor.ExpFactor.Exp10.Should().Be( 1 );
+            r10.NormalizationFactor.ExpFactor.Exp2.Should().Be( 0 );
+
+            var inch = MeasureUnit.DefineAlias( "in", "Inch", 2.54, centimetre );
+            var rInch = inch / centimetre;
+            rInch.Normalization.Should().Be( MeasureUnit.None );
+            rInch.NormalizationFactor.Factor.Should().Be( 2.54 );
+            rInch.NormalizationFactor.ExpFactor.Exp10.Should().Be( 0 );
+            rInch.NormalizationFactor.ExpFactor.Exp2.Should().Be( 0 );
+        }
     }
 }

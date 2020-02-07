@@ -15,11 +15,11 @@ namespace CK.UnitsOfMeasure.Tests
             var c = new StandardMeasureContext( "Empty" );
             var sievert = c.DefineAlias( "Sv", "Sievert", FullFactor.Neutral, (c.Metre ^ 2) * (c.Second ^ 2), AutoStandardPrefix.Metric );
             MeasureStandardPrefix.MetricPrefixes.Select( p => p.Abbreviation + "Sv" )
-                                     .Where( a => c.IsValidNewAbbreviation( a, AutoStandardPrefix.None ) )
+                                     .Where( a => c.CheckValidNewAbbreviation( a, AutoStandardPrefix.None ) != MeasureContext.NewAbbreviationConflict.MatchPotentialAutoStandardPrefixedUnit )
                                      .Should().BeEmpty();
 
             MeasureStandardPrefix.BinaryPrefixes.Select( p => p.Abbreviation + "Sv" )
-                                     .Where( a => c.IsValidNewAbbreviation( a, AutoStandardPrefix.None ) == false )
+                                     .Where( a => c.CheckValidNewAbbreviation( a, AutoStandardPrefix.None ) == MeasureContext.NewAbbreviationConflict.MatchPotentialAutoStandardPrefixedUnit )
                                      .Should().BeEmpty();
 
             var x = c.DefineAlias( "xSv", "Bad name but okay...", FullFactor.Neutral, c.Ampere );
@@ -43,17 +43,17 @@ namespace CK.UnitsOfMeasure.Tests
         {
             var cM = new StandardMeasureContext( "WithMinute" );
             var minute = cM.DefineAlias( "min", "Minute", new FullFactor( 60 ), cM.Second );
-            cM.IsValidNewAbbreviation( "in", AutoStandardPrefix.None ).Should().BeTrue();
-            cM.IsValidNewAbbreviation( "in", AutoStandardPrefix.Binary ).Should().BeTrue();
-            cM.IsValidNewAbbreviation( "in", AutoStandardPrefix.Metric ).Should().BeFalse();
+            cM.CheckValidNewAbbreviation( "in", AutoStandardPrefix.None ).Should().Be( MeasureContext.NewAbbreviationConflict.None );
+            cM.CheckValidNewAbbreviation( "in", AutoStandardPrefix.Binary ).Should().Be( MeasureContext.NewAbbreviationConflict.None );
+            cM.CheckValidNewAbbreviation( "in", AutoStandardPrefix.Metric ).Should().Be( MeasureContext.NewAbbreviationConflict.AmbiguousAutoStandardPrefix );
 
             var cI = new StandardMeasureContext( "WithInchMetric" );
             var inch = cI.DefineAlias( "in",
-                                                    "Inch",
-                                                    2.54,
-                                                    MeasureStandardPrefix.Centi[cI.Metre],
-                                                    AutoStandardPrefix.Metric );
-            cI.IsValidNewAbbreviation( "min", AutoStandardPrefix.None ).Should().BeFalse();
+                                       "Inch",
+                                       2.54,
+                                       MeasureStandardPrefix.Centi[cI.Metre],
+                                       AutoStandardPrefix.Metric );
+            cI.CheckValidNewAbbreviation( "min", AutoStandardPrefix.None ).Should().Be( MeasureContext.NewAbbreviationConflict.MatchPotentialAutoStandardPrefixedUnit );
         }
 
         [Test]
