@@ -6,10 +6,10 @@
     <IsPackable>False</IsPackable>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="NuGet.Protocol" Version="5.4.0" />
+    <PackageReference Include="NuGet.Protocol" Version="5.5.1" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="NuGet.Credentials" Version="5.4.0" />
+    <PackageReference Include="NuGet.Credentials" Version="5.5.1" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="TestResult.xml" />
