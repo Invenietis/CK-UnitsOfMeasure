@@ -10,7 +10,7 @@ using System.Diagnostics;
 namespace CK.UnitsOfMeasure
 {
     /// <summary>
-    /// The base class for all measure unit also handles the combination of multiples <see cref="MeasureUnit"/>.
+    /// The base class for all measure unit also handles the combination of multiples <see cref="ExponentMeasureUnit"/>.
     /// </summary>
     public partial class MeasureUnit
     {
@@ -25,7 +25,7 @@ namespace CK.UnitsOfMeasure
         /// MeasureUnit bound to itself.
         /// </summary>
         /// <param name="ctx">The context.</param>
-        /// <param name="abbreviation">The abbreviatiuon.</param>
+        /// <param name="abbreviation">The abbreviation.</param>
         /// <param name="name">The name.</param>
         /// <param name="isNormalized">True if this measure unit is the normalized one for its dimension.</param>
         private protected MeasureUnit( MeasureContext ctx, string abbreviation, string name, bool isNormalized )
@@ -69,8 +69,9 @@ namespace CK.UnitsOfMeasure
         public MeasureContext Context => _ctx;
 
         /// <summary>
-        /// Gets the abbreviation that identifies this measure.
+        /// Gets the abbreviation that identifies this measure (this is the key).
         /// It is null if and only if this is the <see cref="None"/> unit.
+        /// Abbreviations are case sensitive ('b' for bit must coexist with 'B' for byte).
         /// </summary>
         public string Abbreviation { get; }
 
@@ -203,9 +204,9 @@ namespace CK.UnitsOfMeasure
         /// </summary>
         /// <param name="abbreviation">
         /// The unit of measure abbreviation.
-        /// This is the key that is used. It must not be null or empty.
+        /// This is the key that is used. It must not be null or empty and characters case must exactly match.
         /// </param>
-        /// <param name="name">The full name. Must not be null or empty.</param>
+        /// <param name="name">The full name. Must not be null or empty and characters case must exactly match.</param>
         /// <param name="definitionFactor">
         /// The factor that applies to the <see cref="AliasMeasureUnit.Definition"/>.
         /// Must not be <see cref="FullFactor.Zero"/>.
@@ -226,14 +227,14 @@ namespace CK.UnitsOfMeasure
         }
 
         /// <summary>
-        /// Define a new fundamental unit of measure.
+        /// Defines a new fundamental unit of measure.
         /// Just like <see cref="DefineAlias"/>, the same fundamental unit can be redefined multiple times
         /// as long as it is actually the same: for fundamental units, the <see cref="Name"/>
         /// (and the normalizedPrefix if any) must be exaclty the same.
         /// </summary>
         /// <param name="abbreviation">
         /// The unit of measure abbreviation.
-        /// This is the key that is used. It must not be null or empty.
+        /// This is the key that is used. It must not be null or empty and characters case must exactly match.
         /// </param>
         /// <param name="name">The full name. Must not be null or empty.</param>
         /// <param name="autoStandardPrefix">

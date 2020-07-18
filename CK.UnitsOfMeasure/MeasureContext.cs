@@ -14,9 +14,9 @@ namespace CK.UnitsOfMeasure
     {
         readonly ConcurrentDictionary<string, MeasureUnit> _allUnits;
 
-        internal MeasureContext(string name, bool isDefault)
+        internal MeasureContext( string name, bool isDefault )
         {
-            _allUnits = new ConcurrentDictionary<string, MeasureUnit>();
+            _allUnits = new ConcurrentDictionary<string, MeasureUnit>( StringComparer.Ordinal );
             if( !isDefault )
             {
                 if( String.IsNullOrWhiteSpace( name ) ) throw new ArgumentException( "Must not be null or empty.", nameof( name ) );
@@ -44,6 +44,7 @@ namespace CK.UnitsOfMeasure
 
         /// <summary>
         /// Gets a <see cref="MeasureUnit"/> from its abbreviation or null if it has not been registered.
+        /// Abbreviations are case sensitive ('b' for bit must coexist with 'B' for byte).
         /// </summary>
         /// <param name="abbreviation">The abbreviation.</param>
         /// <returns>The measure unit or null.</returns>
@@ -57,15 +58,53 @@ namespace CK.UnitsOfMeasure
         }
 
         /// <summary>
-        /// Checks whether a new unit abbreviation can be defined in this context.
+        /// Qualifies the abbreviation potential clash detected by <see cref="CheckValidNewAbbreviation(string, AutoStandardPrefix)"/>.
+        /// </summary>
+        public enum NewAbbreviationConflict
+        {
+            /// <summary>
+            /// No conflict at all.
+            /// </summary>
+            None,
+
+            /// <summary>
+            /// The abbreviation already exists. If redefined, the redefinition must match the existing definition.
+            /// </summary>
+            Exists,
+
+            /// <summary>
+            /// The abbreviation contains invalid characters (or is empty).
+            /// </summary>
+            InvalidCharacters,
+
+            /// <summary>
+            /// At least one automatic prefix of this unit will clash with a current registered unit.
+            /// (This can never happen when <see cref="AutoStandardPrefix.None"/> is used to check
+            /// the abbreviation).
+            /// </summary>
+            AmbiguousAutoStandardPrefix,
+
+            /// <summary>
+            /// The abbreviation will clash with an automatically standard prefixed unit.
+            /// </summary>
+            MatchPotentialAutoStandardPrefixedUnit
+        }
+
+        /// <summary>
+        /// Checks whether a new unit abbreviation can be defined (or may be redefined) in this context.
         /// </summary>
         /// <param name="a">The proposed abbreviation.</param>
         /// <param name="autoStandardPrefix">
         /// Whether the new unit must support automatic metric and/or binary standard prefixes.
         /// </param>
-        /// <returns>True if the abbreviation can be used, false otherwise.</returns>
-        public bool IsValidNewAbbreviation( string a, AutoStandardPrefix autoStandardPrefix )
+        /// <returns>The <see cref="NewAbbreviationConflict"/> flag.</returns>
+        public NewAbbreviationConflict CheckValidNewAbbreviation( string a, AutoStandardPrefix autoStandardPrefix )
         {
+            if( _allUnits.ContainsKey( a ) )
+            {
+                return NewAbbreviationConflict.Exists;
+            }
+
             if( String.IsNullOrEmpty( a )
                 || !a.All( c => Char.IsLetter( c )
                                 || Char.IsSymbol( c )
@@ -73,29 +112,29 @@ namespace CK.UnitsOfMeasure
                                 || c == '%' || c == '‰' || c == '‱'
                                 || c == '㏙' ) )
             {
-                return false;
+                return NewAbbreviationConflict.InvalidCharacters;
             }
             foreach( var withPrefix in MeasureStandardPrefix.GetPrefixes( autoStandardPrefix )
-                                                        .Select( p => p.Abbreviation + a ) )
+                                                            .Select( p => p.Abbreviation + a ) )
             {
-                if( _allUnits.ContainsKey( withPrefix ) ) return false;
+                if( _allUnits.ContainsKey( withPrefix ) ) return NewAbbreviationConflict.AmbiguousAutoStandardPrefix;
             }
-
-            var prefix = MeasureStandardPrefix.FindPrefix( a );
             // Optimization: if the new abbreviation does not start with a
             // standard prefix, it is useless to challenge it against
             // existing units.
-            if( prefix != MeasureStandardPrefix.None )
-            {
-                return !_allUnits.Values
+            var prefix = MeasureStandardPrefix.FindPrefix( a );
+            if( prefix != MeasureStandardPrefix.None
+                && _allUnits.Values
                             .OfType<AtomicMeasureUnit>()
                             .Where( u => u.AutoStandardPrefix != AutoStandardPrefix.None )
                             .SelectMany( u => MeasureStandardPrefix.GetPrefixes( u.AutoStandardPrefix )
                                                 .Where( p => p != MeasureStandardPrefix.None )
                                                 .Select( p => p.Abbreviation + u.Abbreviation ) )
-                            .Any( exists => exists == a );
+                            .Any( exists => exists == a ) )
+            {
+                return NewAbbreviationConflict.MatchPotentialAutoStandardPrefixedUnit;
             }
-            return true;
+            return NewAbbreviationConflict.None;
         }
 
         /// <summary>
@@ -123,7 +162,7 @@ namespace CK.UnitsOfMeasure
             MeasureUnit definition,
             AutoStandardPrefix autoStandardPrefix = AutoStandardPrefix.None )
         {
-            if( !IsValidNewAbbreviation( abbreviation, autoStandardPrefix ) ) throw new ArgumentException( $"Invalid abbreviation {abbreviation}.", nameof( abbreviation ) );
+            CheckArgumentAbbreviation( abbreviation, autoStandardPrefix );
             if( String.IsNullOrWhiteSpace( name ) ) throw new ArgumentException( "Must not be null or white space.", nameof( name ) );
             if( definitionFactor.IsZero ) throw new ArgumentException( "Must not be zero.", nameof( definitionFactor ) );
             if( definition == null ) throw new ArgumentNullException( nameof( definition ) );
@@ -159,7 +198,7 @@ namespace CK.UnitsOfMeasure
             AutoStandardPrefix autoStandardPrefix = AutoStandardPrefix.None,
             MeasureStandardPrefix normalizedPrefix = null )
         {
-            if( !IsValidNewAbbreviation( abbreviation, autoStandardPrefix ) ) throw new ArgumentException( $"Invalid abbreviation {abbreviation}.", nameof( abbreviation ) );
+            CheckArgumentAbbreviation( abbreviation, autoStandardPrefix );
             if( String.IsNullOrWhiteSpace( name ) ) throw new ArgumentException( "Must not be null or white space.", nameof( name ) );
             if( normalizedPrefix == null || normalizedPrefix == MeasureStandardPrefix.None )
             {
@@ -182,16 +221,19 @@ namespace CK.UnitsOfMeasure
         {
             if( d == MeasureUnit.None )
             {
-                if( f.Factor != 1.0 ) throw new Exception( "Only exponential factor is allowed for dimensionless units." );
+                if( f.Factor != 1.0 ) throw new ArgumentException( "Only exponential factor is allowed for dimensionless units." );
                 d = RegisterPrefixed( f.ExpFactor, MeasureStandardPrefix.None, MeasureUnit.None, false );
                 f = FullFactor.Neutral;
             }
             return Register( abbreviation: a,
-                                name: n,
-                                creator: () => new AliasMeasureUnit( this, a, n, f, d, stdPrefix ),
-                                checker: m => m.Definition.Normalization == d.Normalization
-                                                && m.NormalizationFactor == d.NormalizationFactor.Multiply( f )
-                                                && m.AutoStandardPrefix == stdPrefix );
+                             name: n,
+                             creator: () => new AliasMeasureUnit( this, a, n, f, d, stdPrefix ),
+                             checker: m =>
+                             {
+                                 if( m.Definition.Normalization != d.Normalization ) ThrowArgumentException( m, $"new definition unit '{d}' is not compatible with '{m.Definition}'." );
+                                 if( m.NormalizationFactor != d.NormalizationFactor.Multiply( f ) ) ThrowArgumentException( m, $"new normalization factor '{f}' should be '{m.NormalizationFactor.DivideBy(d.NormalizationFactor)}'." );
+                                 CheckArgumentAutoStdPrefix( m, stdPrefix );
+                             } );
         }
 
         internal MeasureUnit RegisterCombined( ExponentMeasureUnit[] units )
@@ -208,7 +250,7 @@ namespace CK.UnitsOfMeasure
         }
 
         /// <summary>
-        /// The isNormalized is nullable: when automatically creating PrefixedUnit this is null and :
+        /// The isNormalized is nullable: when automatically creating PrefixedUnit this is null and:
         ///  - if the unit must be created it won't be the normalized one.
         ///  - if the unit is found, we don't check the potential race condition.
         /// Only when explicitly registering/creating the unit with true or false, the resulting unit IsNormalized
@@ -217,17 +259,24 @@ namespace CK.UnitsOfMeasure
         internal PrefixedMeasureUnit RegisterPrefixed( ExpFactor adjustment, MeasureStandardPrefix p, AtomicMeasureUnit u, bool? isNormalized = null )
         {
             var names = PrefixedMeasureUnit.ComputeNames( adjustment, p, u );
-            return Register( names.A, names.N, () => new PrefixedMeasureUnit( this, names, adjustment, p, u, isNormalized ?? false ), m => !isNormalized.HasValue || m.IsNormalized == isNormalized );
+            return Register( names.A, names.N, () => new PrefixedMeasureUnit( this, names, adjustment, p, u, isNormalized ?? false ), m =>
+            {
+                if( isNormalized.HasValue && m.IsNormalized != isNormalized ) ThrowArgumentException( m, $"new IsNormalized '{isNormalized}' differ from '{m.IsNormalized}'." );
+            } );
         }
 
         FundamentalMeasureUnit RegisterFundamental( string abbreviation, string name, AutoStandardPrefix stdPrefix, bool isNormalized )
         {
             return Register( abbreviation, name,
                              creator: () => new FundamentalMeasureUnit( this, abbreviation, name, stdPrefix, isNormalized ),
-                             checker: m => m.IsNormalized == isNormalized && m.AutoStandardPrefix == stdPrefix );
+                             checker: m =>
+                             {
+                                 if( m.IsNormalized != isNormalized ) ThrowArgumentException( m, $"new IsNormalized {isNormalized} differ from {m.IsNormalized}." );
+                                 CheckArgumentAutoStdPrefix( m, stdPrefix );
+                             } );
         }
 
-        T Register<T>( string abbreviation, string name, Func<T> creator, Func<T, bool> checker )
+        T Register<T>( string abbreviation, string name, Func<T> creator, Action<T> checker )
                     where T : MeasureUnit
         {
             T m = CheckSingleRegistration( abbreviation, name, checker );
@@ -240,22 +289,39 @@ namespace CK.UnitsOfMeasure
             return m;
         }
 
-        T CheckSingleRegistration<T>( string abbreviation, string name, Func<T, bool> check )
+        T CheckSingleRegistration<T>( string abbreviation, string name, Action<T> check )
             where T : MeasureUnit
         {
             T result = null;
-            // If they are not the same (null included) or if the type is not the right one or 
-            // there is a check function that fails, this an error.
-            if( _allUnits.TryGetValue( abbreviation, out var m )
-                &&
-                (m.Abbreviation != abbreviation
-                 || m.Name != name
-                 || (result = m as T) == null
-                 || (m != null && check != null && !check( result ))) )
+            if( _allUnits.TryGetValue( abbreviation, out var m ) )
             {
-                throw new Exception( $"Registration mismatch for {abbreviation} ({name})." );
+                Debug.Assert( m.Abbreviation == abbreviation );
+                if( m.Name != name ) ThrowArgumentException( m, $"new name '{name}' differ from '{m.Name}'." );
+                if( (result = m as T) == null ) ThrowArgumentException( m, $"new type '{typeof( T ).Name}' differ from '{m.GetType().Name}'." );
+                check?.Invoke( result );
             }
             return result;
         }
+
+        void CheckArgumentAbbreviation( string abbreviation, AutoStandardPrefix autoStandardPrefix )
+        {
+            var conflict = CheckValidNewAbbreviation( abbreviation, autoStandardPrefix );
+            if( conflict != NewAbbreviationConflict.None && conflict != NewAbbreviationConflict.Exists )
+            {
+                throw new ArgumentException( $"Invalid abbreviation {abbreviation} ({conflict}).", nameof( abbreviation ) );
+            }
+        }
+
+
+        void CheckArgumentAutoStdPrefix( AtomicMeasureUnit m, AutoStandardPrefix stdPrefix )
+        {
+            if( m.AutoStandardPrefix != stdPrefix ) ThrowArgumentException( m, $"new AutoStandardPrefix '{stdPrefix}' differ from '{m.AutoStandardPrefix}'." );
+        }
+
+        void ThrowArgumentException( MeasureUnit m, string explain )
+        {
+            throw new ArgumentException( $"Already existing unit registration (context '{Name}') for '{m.ToString()}': " + explain );
+        }
+
     }
 }

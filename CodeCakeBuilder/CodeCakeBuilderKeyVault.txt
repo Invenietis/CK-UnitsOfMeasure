@@ -1,5 +1,5 @@
--- Version: 1
+-- Version: 2
 -- Keys below can be removed if needed.
 NUGET_ORG_PUSH_API_KEY
 AZURE_FEED_SIGNATURE_OPENSOURCE_PAT
- > uiu+tq3ceDnXnr8ub498fzuVKP7qt3cbkRrLodESxuiPfOmnh3PXJMAYB+zKL4UxtJyB/1ucSIyJxakzcfxQ6bVNNgregCL8NvtH4+KzEuxU0a0jcRHp/p8g4zy020YV4cFBISJ7Shly8yzF5bVqn84dbqNUIskPdzKXe041rFaubDTddYZvJEahjdYhpI7TwIyewLMgmHA2ljJpl7nE+1pqxz+e+MHoqEc1w8OJv+w=
+ > 5S3ecmPwl/c9VctnmLWjjvQHYwI/VKCZfWeIYJUdnFVj7YoNCnyJTvDwbLwnmP6lhVvAFyqz4xzJ4nxg4IL1Gjr3qlA5cPHy8nJy0jaE5N1Nf4d6Do4lCd35Av46bGmubudhHl9WJGGFoiDaF0eKLhEi49KPYKE7N7T3DC6NX5JhRe/FGtPQTJOZZGd7pUtR34Rqa/wl8avcaA6UViqbk5NX7O1+DaDimEpaXBvY/7c=
