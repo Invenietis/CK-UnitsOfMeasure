@@ -33,7 +33,7 @@
 
   <!--<StandardProperties>-->
   <PropertyGroup>
-    <RepositoryUrl>https://github.com/Invenietis/CK-UnitsOfMeasure.git</RepositoryUrl>
+    <RepositoryUrl>https://github.com/Invenietis/CK-UnitsOfMeasure</RepositoryUrl>
     <ProductName>CK</ProductName>
     <Company>Signature Code</Company>
     <Authors>Signature Code</Authors>
