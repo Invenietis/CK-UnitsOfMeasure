@@ -111,9 +111,9 @@ namespace CodeCake
                 var exclude = new List<string>( excludedProjectsName ) { "CodeCakeBuilder" };
                 tempSln.ExcludeProjectsFromBuild( exclude.ToArray() );
                 _globalInfo.Cake.DotNetCoreBuild( tempSln.FullPath.FullPath,
-                    new DotNetCoreBuildSettings().AddVersionArguments( _globalInfo.GitInfo, s =>
+                    new DotNetCoreBuildSettings().AddVersionArguments( _globalInfo.BuildInfo, s =>
                     {
-                        s.Configuration = _globalInfo.BuildConfiguration;
+                        s.Configuration = _globalInfo.BuildInfo.BuildConfiguration;
                     } ) );
             }
         }
@@ -128,28 +128,42 @@ namespace CodeCake
             foreach( SolutionProject project in testProjects )
             {
                 NormalizedPath projectPath = project.Path.GetDirectory().FullPath;
-                NormalizedPath binDir = projectPath.AppendPart( "bin" ).AppendPart( _globalInfo.BuildConfiguration );
+                NormalizedPath binDir = projectPath.AppendPart( "bin" ).AppendPart( _globalInfo.BuildInfo.BuildConfiguration );
                 NormalizedPath objDir = projectPath.AppendPart( "obj" );
                 string assetsJson = File.ReadAllText( objDir.AppendPart( "project.assets.json" ) );
                 bool isNunitLite = assetsJson.Contains( "NUnitLite" );
                 bool isVSTest = assetsJson.Contains( "Microsoft.NET.Test.Sdk" );
                 foreach( NormalizedPath buildDir in
                     Directory.GetDirectories( binDir )
-                        .Where( p => Directory.EnumerateFiles( p )
-                        .Any() )
+                        .Where( p => Directory.EnumerateFiles( p ).Any() )
                 )
                 {
                     string framework = buildDir.LastPart;
+                    bool isNetFramework = framework.StartsWith( "net" ) && framework.Length == 6 && int.TryParse( framework.Substring( 3 ), out var _ );
                     string fileWithoutExtension = buildDir.AppendPart( project.Name );
                     string testBinariesPath = "";
                     if( isNunitLite )
                     {
                         // Using NUnitLite.
-                        testBinariesPath = fileWithoutExtension + ".dll";
-                        _globalInfo.Cake.Information( $"Testing via NUnitLite ({framework}): {testBinariesPath}" );
-                        if( !_globalInfo.CheckCommitMemoryKey( testBinariesPath ) )
+                        if( isNetFramework && File.Exists( (testBinariesPath = fileWithoutExtension + ".exe") ) )
                         {
-                            _globalInfo.Cake.DotNetCoreExecute( testBinariesPath );
+                            _globalInfo.Cake.Information( $"Testing via NUnitLite ({framework}): {testBinariesPath}" );
+                            if( !_globalInfo.CheckCommitMemoryKey( testBinariesPath ) )
+                            {
+                                _globalInfo.Cake.NUnit3( new[] { testBinariesPath }, new NUnit3Settings
+                                {
+                                    Results = new[] { new NUnit3Result() { FileName = FilePath.FromString( projectPath.AppendPart( "TestResult.Net461.xml" ) ) } }
+                                } );
+                            }
+                        }
+                        else
+                        {
+                            testBinariesPath = fileWithoutExtension + ".dll";
+                            _globalInfo.Cake.Information( $"Testing via NUnitLite ({framework}): {testBinariesPath}" );
+                            if( !_globalInfo.CheckCommitMemoryKey( testBinariesPath ) )
+                            {
+                                _globalInfo.Cake.DotNetCoreExecute( testBinariesPath );
+                            }
                         }
                     }
                     if( isVSTest )
@@ -161,7 +175,7 @@ namespace CodeCake
                         {
                             var options = new DotNetCoreTestSettings()
                             {
-                                Configuration = _globalInfo.BuildConfiguration,
+                                Configuration = _globalInfo.BuildInfo.BuildConfiguration,
                                 Framework = framework,
                                 NoRestore = true,
                                 NoBuild = true,
