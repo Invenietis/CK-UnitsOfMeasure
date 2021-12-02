@@ -230,7 +230,7 @@ namespace CK.UnitsOfMeasure
         /// Defines a new fundamental unit of measure.
         /// Just like <see cref="DefineAlias"/>, the same fundamental unit can be redefined multiple times
         /// as long as it is actually the same: for fundamental units, the <see cref="Name"/>
-        /// (and the normalizedPrefix if any) must be exaclty the same.
+        /// (and the normalizedPrefix if any) must be exactly the same.
         /// </summary>
         /// <param name="abbreviation">
         /// The unit of measure abbreviation.
@@ -274,7 +274,7 @@ namespace CK.UnitsOfMeasure
         /// Overridden to return the <see cref="Abbreviation"/>.
         /// </summary>
         /// <returns>This unit's abbreviation.</returns>
-        public override string ToString() => Abbreviation;
+        public override sealed string ToString() => Abbreviation;
 
     }
 }

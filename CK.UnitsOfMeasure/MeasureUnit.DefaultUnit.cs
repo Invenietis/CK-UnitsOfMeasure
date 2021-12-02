@@ -19,7 +19,7 @@ namespace CK.UnitsOfMeasure
         public static bool TryParse( string text, out MeasureUnit u ) => StandardMeasureContext.Default.TryParse( text, out u );
 
         /// <summary>
-        /// Dimensionles unit. Associated abbreviation is "" (the empty string) and its name is "None".
+        /// Dimensionless unit. Associated abbreviation is "" (the empty string) and its name is "None".
         /// Its <see cref="Context"/> is null: the None unit is logically bound to all contexts.
         /// </summary>
         public static FundamentalMeasureUnit None = new FundamentalMeasureUnit( null, "", "None", AutoStandardPrefix.None, true );
@@ -30,7 +30,7 @@ namespace CK.UnitsOfMeasure
         public static FundamentalMeasureUnit Unit => StandardMeasureContext.Default.Unit;
 
         /// <summary>
-        /// The metre is the length of the path travelled by light in vacuum during a time interval of 1/299792458 
+        /// The metre is the length of the path traveled by light in vacuum during a time interval of 1/299792458 
         /// of a second. 
         /// This is the SI base unit of measure of distance.
         /// Associated abbreviation is "m".

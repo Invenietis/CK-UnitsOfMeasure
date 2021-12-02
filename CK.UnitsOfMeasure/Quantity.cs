@@ -79,7 +79,7 @@ namespace CK.UnitsOfMeasure
 
         /// <summary>
         /// Checks whether another quantity can be added to this one.
-        /// The adqed quantity must be convertible (see <see cref="CanConvertTo"/>) into this <see cref="Unit"/>.
+        /// The added quantity must be convertible (see <see cref="CanConvertTo"/>) into this <see cref="Unit"/>.
         /// </summary>
         /// <param name="q">The quantity that may be added to this quantity.</param>
         /// <returns>True if <see cref="Add"/> can be called.</returns>
@@ -124,7 +124,7 @@ namespace CK.UnitsOfMeasure
         /// is thrown.
         /// </summary>
         /// <param name="u">The target unit of measure.</param>
-        /// <returns>The quantity exporessed with the target unit.</returns>
+        /// <returns>The quantity expressed with the target unit.</returns>
         public Quantity ConvertTo( MeasureUnit u )
         {
             if( Unit == u ) return this;
@@ -252,7 +252,7 @@ namespace CK.UnitsOfMeasure
             // Do the 2 units belong to the same (possibly null) context?
             if( tU.Context == oU.Context )
             {
-                // First chexk our equality: we must do this first to ensure coherency.
+                // First check our equality: we must do this first to ensure coherency.
                 if( ToNormalizedString() == other.ToNormalizedString() )
                 {
                     return 0;

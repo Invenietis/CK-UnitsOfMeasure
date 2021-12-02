@@ -46,7 +46,7 @@ namespace CK.UnitsOfMeasure
         public readonly FundamentalMeasureUnit Unit;
 
         /// <summary>
-        /// The metre is the length of the path travelled by light in vacuum during a time interval of 1/299792458 
+        /// The metre is the length of the path traveled by light in vacuum during a time interval of 1/299792458 
         /// of a second. 
         /// This is the SI base unit of measure of distance.
         /// Associated abbreviation is "m".
@@ -55,7 +55,7 @@ namespace CK.UnitsOfMeasure
 
         /// <summary>
         /// The kilogram is the unit of mass; it is equal to the mass of the international prototype of the kilogram.
-        /// This is the only SI base unit that incluedes a prefix. To avoid coping with this exception in the code, we
+        /// This is the only SI base unit that includes a prefix. To avoid coping with this exception in the code, we
         /// define it as a <see cref="PrefixedMeasureUnit"/> based on the gram (<see cref="MeasureStandardPrefix.Kilo"/>
         /// of <see cref="Gram"/>) .
         /// Associated abbreviation is "kg".

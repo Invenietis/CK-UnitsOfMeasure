@@ -42,7 +42,7 @@ namespace CK.UnitsOfMeasure
         public ExpFactor Factor { get; }
 
         /// <summary>
-        /// Returs the <see cref="Abbreviation"/> or the Abbreviation followed by (<see cref="Name"/>, <see cref="Factor"/>).
+        /// Returns the <see cref="Abbreviation"/> or the Abbreviation followed by (<see cref="Name"/>, <see cref="Factor"/>).
         /// </summary>
         /// <param name="withName">True if name and factor should be added.</param>
         /// <returns>The readable string.</returns>
