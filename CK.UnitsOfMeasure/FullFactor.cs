@@ -107,6 +107,19 @@ namespace CK.UnitsOfMeasure
             return Factor.ToString() + ExpFactor.ToString( '*' );
         }
 
+        /// <summary>
+        /// Returns a textual representation of this factor.
+        /// </summary>
+        /// <param name="formatProvider">The format provider that will be used for the <see cref="Factor"/>.</param>
+        /// <returns>A readable string.</returns>
+        public string ToString( IFormatProvider formatProvider )
+        {
+            if( IsNeutral ) return String.Empty;
+            if( IsZero ) return "0";
+            if( Factor == 1.0 ) return ExpFactor.ToString();
+            return Factor.ToString( formatProvider ) + ExpFactor.ToString( '*' );
+        }
+
 #pragma warning disable 1591
         public static implicit operator FullFactor( double d ) => new FullFactor( d );
 
