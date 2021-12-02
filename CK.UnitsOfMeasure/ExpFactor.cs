@@ -52,10 +52,10 @@ namespace CK.UnitsOfMeasure
         public ExpFactor Power( int p ) => new ExpFactor( Exp2 * p, Exp10 * p );
 
         /// <summary>
-        /// Multplies this factor by another one.
+        /// Multiplies this factor by another one.
         /// </summary>
         /// <param name="x">The factor.</param>
-        /// <returns>This factor multipied by <paramref name="x"/>.</returns>
+        /// <returns>This factor multiplied by <paramref name="x"/>.</returns>
         public ExpFactor Multiply( ExpFactor x ) => new ExpFactor( Exp2 + x.Exp2, Exp10 + x.Exp10 );
 
         /// <summary>
@@ -75,7 +75,7 @@ namespace CK.UnitsOfMeasure
         /// Gets the string representation. Can be the empty string (if <see cref="IsNeutral"/>) or
         /// the "10^<see cref="Exp10"/>.2^<see cref="Exp2"/>" optionally prefixed by <paramref name="mult"/>.
         /// </summary>
-        /// <param name="mult">Multipication character ('\0' for none, typically '*' or '.').</param>
+        /// <param name="mult">Multiplication character ('\0' for none, typically '*' or '.').</param>
         /// <returns>A readable string.</returns>
         public string ToString( char mult )
         {
@@ -87,6 +87,32 @@ namespace CK.UnitsOfMeasure
             }
             else if( Exp2 != 0 ) s = (mult != '\0' ? mult + "2^" : "2^") + Exp2.ToString( CultureInfo.InvariantCulture );
             return s;
+        }
+
+        public static ExpFactor Parse( string s )
+        {
+            if( !TryParse( s, out ExpFactor result ) )
+                throw new ArgumentException( $"Unable to parse ExpFactor: '{s}'", nameof( s ) );
+            return result;
+        }
+
+        public static bool TryParse( string s, out ExpFactor factor )
+        {
+            factor = Neutral;
+            if( s.Length == 0 ) return true;
+            if( s.StartsWith( "10^", StringComparison.Ordinal ) )
+            {
+                if( !Int16.TryParse( s.Substring( 3 ), NumberStyles.Integer, CultureInfo.InvariantCulture, out short exp ) ) return false;
+                factor = new ExpFactor( 0, exp );
+                return true;
+            }
+            if( s.StartsWith( "2^", StringComparison.Ordinal ) )
+            {
+                if( !Int16.TryParse( s.Substring( 2 ), NumberStyles.Integer, CultureInfo.InvariantCulture, out short exp ) ) return false;
+                factor = new ExpFactor( exp, 0 );
+                return true;
+            }
+            return false;
         }
 
         /// <summary>
