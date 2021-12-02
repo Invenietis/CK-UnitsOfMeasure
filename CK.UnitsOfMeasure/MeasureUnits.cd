@@ -1,0 +1,116 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Comment CommentText="Static properties (like the standard units that are simple relays to StandardMeasureContext.Default) and internals have been removed.&#xD;&#xA;">
+    <Position X="5.684" Y="0.5" Height="0.838" Width="2.571" />
+  </Comment>
+  <Class Name="CK.UnitsOfMeasure.MeasureUnit">
+    <Position X="2.75" Y="0.5" Width="2.75" />
+    <Members>
+      <Field Name="_ctx" Hidden="true" />
+      <Field Name="_invert" Hidden="true" />
+      <Field Name="_normalization" Hidden="true" />
+      <Field Name="_normalizationFactor" Hidden="true" />
+      <Field Name="_units" Hidden="true" />
+      <Property Name="Ampere" Hidden="true" />
+      <Property Name="Bit" Hidden="true" />
+      <Property Name="Byte" Hidden="true" />
+      <Property Name="Candela" Hidden="true" />
+      <Method Name="DefineAlias" Hidden="true" />
+      <Method Name="DefineFundamental" Hidden="true" />
+      <Method Name="GetNormalization" Hidden="true" />
+      <Property Name="Gram" Hidden="true" />
+      <Property Name="Kelvin" Hidden="true" />
+      <Property Name="Kilogram" Hidden="true" />
+      <Method Name="MeasureUnit" Hidden="true" />
+      <Property Name="Metre" Hidden="true" />
+      <Property Name="Mole" Hidden="true" />
+      <Field Name="None" Hidden="true" />
+      <Method Name="operator *" Hidden="true" />
+      <Method Name="operator /" Hidden="true" />
+      <Method Name="operator ^" Hidden="true" />
+      <Property Name="Second" Hidden="true" />
+      <Method Name="SetPrefixedNormalization" Hidden="true" />
+      <Method Name="TryParse" Hidden="true" />
+      <Property Name="Unit" Hidden="true" />
+    </Members>
+    <NestedTypes>
+      <Struct Name="CK.UnitsOfMeasure.MeasureUnit.Combinator" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>MeasureUnit.Combinator.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Struct>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>IIAAiERAAoEAIAgkKAQBCA4ARCMBAAgBhAAABAEAAAI=</HashCode>
+      <FileName>MeasureUnit.Combinator.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CK.UnitsOfMeasure.AtomicMeasureUnit">
+    <Position X="2.75" Y="7" Width="2.75" />
+    <Members>
+      <Method Name="AtomicMeasureUnit" Hidden="true" />
+      <Method Name="CompareTo" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAQAAAAAAACAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>AtomicMeasureUnit.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="1.787" />
+  </Class>
+  <Class Name="CK.UnitsOfMeasure.ExponentMeasureUnit">
+    <Position X="2.75" Y="5" Width="2.75" />
+    <Members>
+      <Method Name="CompareTo" Hidden="true" />
+      <Method Name="ComputeNames" Hidden="true" />
+      <Method Name="ExponentMeasureUnit" Hidden="true" />
+      <Method Name="GetNormalization" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAQABAAAAAAAACEAAAAAEAAAAAAAAAA=</HashCode>
+      <FileName>ExponentMeasureUnit.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="1.666" />
+  </Class>
+  <Class Name="CK.UnitsOfMeasure.AliasMeasureUnit">
+    <Position X="0.5" Y="9" Width="2.25" />
+    <Members>
+      <Method Name="AliasMeasureUnit" Hidden="true" />
+      <Method Name="GetNormalization" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAACAAAAAAAAAAAECAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>AliasMeasureUnit.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CK.UnitsOfMeasure.PrefixedMeasureUnit">
+    <Position X="3" Y="9" Width="2.25" />
+    <Members>
+      <Method Name="ComputeNames" Hidden="true" />
+      <Method Name="GetNormalization" Hidden="true" />
+      <Method Name="PrefixedMeasureUnit" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAABAAAAAACACEAAAAAAAAEAAAAAAA=</HashCode>
+      <FileName>PrefixedMeasureUnit.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CK.UnitsOfMeasure.FundamentalMeasureUnit">
+    <Position X="5.5" Y="9" Width="2.25" />
+    <Members>
+      <Method Name="FundamentalMeasureUnit" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>FundamentalMeasureUnit.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Struct Name="CK.UnitsOfMeasure.Quantity">
+    <Position X="9" Y="1" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAIAgEAAAAAAAAQE4QWBAoAAAAIABKABAgIkAAAAByI=</HashCode>
+      <FileName>Quantity.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Struct>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
