@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 
 namespace CK.UnitsOfMeasure
@@ -15,7 +16,7 @@ namespace CK.UnitsOfMeasure
         public static readonly FullFactor Neutral = new FullFactor( 1.0, ExpFactor.Neutral );
 
         /// <summary>
-        /// The default factor is 0 (unfortunaletly).
+        /// The default factor is 0 (unfortunately).
         /// </summary>
         public static readonly FullFactor Zero;
 
@@ -106,6 +107,61 @@ namespace CK.UnitsOfMeasure
             if( Factor == 1.0 ) return ExpFactor.ToString();
             return Factor.ToString() + ExpFactor.ToString( '*' );
         }
+
+        /// <summary>
+        /// Returns a textual representation of this factor.
+        /// </summary>
+        /// <param name="formatProvider">The format provider that will be used for the <see cref="Factor"/>.</param>
+        /// <returns>A readable string.</returns>
+        public string ToString( IFormatProvider formatProvider )
+        {
+            if( IsNeutral ) return String.Empty;
+            if( IsZero ) return "0";
+            if( Factor == 1.0 ) return ExpFactor.ToString();
+            return Factor.ToString( formatProvider ) + ExpFactor.ToString( '*' );
+        }
+
+        public static FullFactor Parse( string s, IFormatProvider formatProvider )
+        {
+            if( !TryParse( s, formatProvider, out FullFactor result ) )
+                throw new ArgumentException( $"Unable to parse FullFactor: '{s}'", nameof( s ) );
+            return result;
+        }
+
+        public static bool TryParse( string s, IFormatProvider formatProvider, out FullFactor factor )
+        {
+            factor = Zero;
+            if( s.Length == 0 )
+            {
+                factor = Neutral;
+                return true;
+            }
+            if( s == "0" )
+            {
+                return true;
+            }
+            int idxStar = s.IndexOf( '*' );
+            if( idxStar > 0 )
+            {
+                if( !double.TryParse( s.Substring( 0, idxStar ), NumberStyles.Float, formatProvider, out double f )
+                    || !ExpFactor.TryParse( s.Substring(idxStar+1), out var exp ) ) return false;
+                factor = new FullFactor( f, exp );
+                return true;
+            }
+            else if( idxStar < 0 )
+            {
+                if( double.TryParse( s, NumberStyles.Float, formatProvider, out double f ) )
+                {
+                    factor = new FullFactor( f );
+                    return true;
+                }
+                if( !ExpFactor.TryParse( s, out var exp ) ) return false;
+                factor = new FullFactor( exp );
+                return true;
+            }
+            return false;
+        }
+
 
 #pragma warning disable 1591
         public static implicit operator FullFactor( double d ) => new FullFactor( d );
