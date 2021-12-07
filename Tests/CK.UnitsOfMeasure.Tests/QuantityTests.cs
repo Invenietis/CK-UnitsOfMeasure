@@ -306,6 +306,9 @@ namespace CK.UnitsOfMeasure.Tests
             
             var qg = q.ConvertTo( MeasureUnit.Gram * MeasureUnit.Gram );
             qg.Value.Should().Be( 35.0 * 1000 );
+
+            // The Equals relies on the Normalization.
+            qkg.Equals( qg ).Should().BeTrue();
         }
     }
 }
