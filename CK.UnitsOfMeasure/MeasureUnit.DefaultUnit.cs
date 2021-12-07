@@ -20,7 +20,7 @@ namespace CK.UnitsOfMeasure
 
         /// <summary>
         /// Dimensionless unit. Associated abbreviation is "" (the empty string) and its name is "None".
-        /// Its <see cref="Context"/> is null: the None unit is logically bound to all contexts.
+        /// Its <see cref="Context"/> is null: the None unit is logically bound to all contexts and is its own normalization.
         /// </summary>
         public static FundamentalMeasureUnit None = new FundamentalMeasureUnit( null, "", "None", AutoStandardPrefix.None, true );
 
