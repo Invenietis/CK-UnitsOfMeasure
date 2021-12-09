@@ -167,6 +167,22 @@ namespace CK.UnitsOfMeasure.Tests
             rInch.NormalizationFactor.Factor.Should().Be( 2.54 );
             rInch.NormalizationFactor.ExpFactor.Exp10.Should().Be( 0 );
             rInch.NormalizationFactor.ExpFactor.Exp2.Should().Be( 0 );
+
+            var inch2 = inch ^ 2;
+            var metre2 = metre ^ 2;
+
+            var rInch2 = inch2 / metre2;
+            rInch2.Normalization.Should().Be( MeasureUnit.None );
+            rInch2.NormalizationFactor.Factor.Should().Be( 2.54 * 2.54 );
+            rInch2.NormalizationFactor.ExpFactor.Exp10.Should().Be( -4 );
+            rInch2.NormalizationFactor.ExpFactor.Exp2.Should().Be( 0 );
+
+            var r2 = rInch * rInch2;
+            r2.Normalization.Should().Be( MeasureUnit.None );
+            r2.NormalizationFactor.Factor.Should().BeApproximately( 2.54 * 2.54 * 2.54, precision: 4e-15 );
+            r2.NormalizationFactor.ExpFactor.Exp10.Should().Be( -4 );
+            r2.NormalizationFactor.ExpFactor.Exp2.Should().Be( 0 );
+
         }
     }
 }
