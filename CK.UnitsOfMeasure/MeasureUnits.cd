@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1">
-  <Comment CommentText="Static properties (like the standard units that are simple relays to StandardMeasureContext.Default) and internals have been removed.&#xD;&#xA;">
-    <Position X="5.684" Y="0.5" Height="0.838" Width="2.571" />
+  <Comment CommentText="Static properties (like the MeasureUnit standard units that are simple relays to StandardMeasureContext.Default) and internals have been hidden.&#xD;&#xA;">
+    <Position X="5.684" Y="0.5" Height="0.827" Width="2.571" />
   </Comment>
   <Class Name="CK.UnitsOfMeasure.MeasureUnit">
     <Position X="2.75" Y="0.5" Width="2.75" />
@@ -104,8 +104,54 @@
       <FileName>FundamentalMeasureUnit.cs</FileName>
     </TypeIdentifier>
   </Class>
+  <Class Name="CK.UnitsOfMeasure.MeasureContext">
+    <Position X="8.5" Y="0.5" Width="3" />
+    <Members>
+      <Field Name="_allUnits" Hidden="true" />
+      <Field Name="_rUnit" Hidden="true" />
+      <Method Name="CheckArgumentAbbreviation" Hidden="true" />
+      <Method Name="CheckArgumentAutoStdPrefix" Hidden="true" />
+      <Method Name="CheckSingleRegistration" Hidden="true" />
+      <Method Name="CreateExponentPrefixed" Hidden="true" />
+      <Method Name="MeasureContext" Hidden="true" />
+      <Method Name="ParseFactor" Hidden="true" />
+      <Method Name="Register" Hidden="true" />
+      <Method Name="RegisterAlias" Hidden="true" />
+      <Method Name="RegisterCombined" Hidden="true" />
+      <Method Name="RegisterExponent" Hidden="true" />
+      <Method Name="RegisterFundamental" Hidden="true" />
+      <Method Name="RegisterPrefixed" Hidden="true" />
+      <Method Name="ThrowArgumentException" Hidden="true" />
+      <Method Name="TryGetExistingExponent" Hidden="true" />
+      <Method Name="TryParseExponent" Hidden="true" />
+    </Members>
+    <Compartments>
+      <Compartment Name="Nested Types" Collapsed="false" />
+    </Compartments>
+    <NestedTypes>
+      <Enum Name="CK.UnitsOfMeasure.MeasureContext.NewAbbreviationConflict">
+        <TypeIdentifier>
+          <NewMemberFileName>MeasureContext.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AKAAAQAAACAAAQQACBAAAAwAAAgBAAAAAAABBAIVEAA=</HashCode>
+      <FileName>MeasureContext.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CK.UnitsOfMeasure.StandardMeasureContext">
+    <Position X="8.5" Y="6" Width="3" />
+    <Members>
+      <Method Name="StandardMeasureContext" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>AAAAAAQAAIAAAAAAKAAAKAIABAEAAAgABAAAAAAAAAA=</HashCode>
+      <FileName>StandardMeasureContext.cs</FileName>
+    </TypeIdentifier>
+  </Class>
   <Struct Name="CK.UnitsOfMeasure.Quantity">
-    <Position X="9" Y="1" Width="2.75" />
+    <Position X="12.5" Y="0.5" Width="2.75" />
     <TypeIdentifier>
       <HashCode>AAIAgEAAAAAAAAQE4QWBAoAAAAIABKABAgIkAAAAByI=</HashCode>
       <FileName>Quantity.cs</FileName>

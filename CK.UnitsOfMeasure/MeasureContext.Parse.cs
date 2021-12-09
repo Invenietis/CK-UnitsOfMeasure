@@ -23,7 +23,7 @@ namespace CK.UnitsOfMeasure
         /// </summary>
         /// <param name="s">The string to parse. Must not be null.</param>
         /// <param name="u">On success, the unit of measure.</param>
-        /// <returns>True on success, false if the string can not be parsed as a measur of unit.</returns>
+        /// <returns>True on success, false if the string can not be parsed as a measure of unit.</returns>
         public bool TryParse( string s, out MeasureUnit u )
         {
             if( s == null ) throw new ArgumentNullException( nameof( s ) );

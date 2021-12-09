@@ -10,7 +10,8 @@ using System.Diagnostics;
 namespace CK.UnitsOfMeasure
 {
     /// <summary>
-    /// The base class for all measure unit also handles the combination of multiples <see cref="ExponentMeasureUnit"/>.
+    /// The base class for all measure unit also handles the combination of multiples <see cref="ExponentMeasureUnit"/>:
+    /// it's both a base class and the concrete class for composite measures.
     /// </summary>
     public partial class MeasureUnit
     {
@@ -216,12 +217,11 @@ namespace CK.UnitsOfMeasure
         /// Whether standard metric and/or binary prefixes can be applied to the unit.
         /// </param>
         /// <returns>The alias unit of measure.</returns>
-        public static AliasMeasureUnit DefineAlias(
-            string abbreviation,
-            string name,
-            FullFactor definitionFactor,
-            MeasureUnit definition,
-            AutoStandardPrefix autoStandardPrefix = AutoStandardPrefix.None )
+        public static AliasMeasureUnit DefineAlias( string abbreviation,
+                                                    string name,
+                                                    FullFactor definitionFactor,
+                                                    MeasureUnit definition,
+                                                    AutoStandardPrefix autoStandardPrefix = AutoStandardPrefix.None )
         {
             return StandardMeasureContext.Default.DefineAlias( abbreviation, name, definitionFactor, definition, autoStandardPrefix );
         }
@@ -248,11 +248,10 @@ namespace CK.UnitsOfMeasure
         /// Defaults to <see cref="MeasureStandardPrefix.None"/>: by default a fundamental unit is the normalized one.
         /// </param>
         /// <returns>The fundamental unit of measure.</returns>
-        public static FundamentalMeasureUnit DefineFundamental(
-            string abbreviation,
-            string name,
-            AutoStandardPrefix autoStandardPrefix = AutoStandardPrefix.None,
-            MeasureStandardPrefix normalizedPrefix = null )
+        public static FundamentalMeasureUnit DefineFundamental( string abbreviation,
+                                                                string name,
+                                                                AutoStandardPrefix autoStandardPrefix = AutoStandardPrefix.None,
+                                                                MeasureStandardPrefix normalizedPrefix = null )
         {
             return StandardMeasureContext.Default.DefineFundamental( abbreviation, name, autoStandardPrefix, normalizedPrefix );
         }

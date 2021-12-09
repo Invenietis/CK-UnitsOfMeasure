@@ -13,9 +13,11 @@ namespace CK.UnitsOfMeasure
         /// <summary>
         /// This is the "G15" format used when calling <see cref="Double.ToString(string, IFormatProvider)"/> (with the <see cref="CultureInfo.InvariantCulture"/>)
         /// to obtain a string where small rounding adjustments are erased.
-        /// <para>The float formatting has changed with .Net Core 3.0 - see https://devblogs.microsoft.com/dotnet/floating-point-parsing-and-formatting-improvements-in-net-core-3-0/ -
+        /// <para>
+        /// The float formatting has changed with .Net Core 3.0 - see https://devblogs.microsoft.com/dotnet/floating-point-parsing-and-formatting-improvements-in-net-core-3-0/ -
         /// so that the ToString is now "roundtrippable" by default.
-        /// The "G15" format is the previous default one that worked perfectly well for our "equality".</para>
+        /// The "G15" format is the previous default one that worked perfectly well for our "equality".
+        /// </para>
         /// </summary>
         public const string ValueRoundedFormat = "G15";
 
@@ -53,7 +55,6 @@ namespace CK.UnitsOfMeasure
         /// <param name="q">Quantity to multiply.</param>
         /// <returns>The resulting quantity.</returns>
         public Quantity Multiply( Quantity q ) => new Quantity( Value * q.Value, Unit * q.Unit );
-
 
         /// <summary>
         /// Divides this quantity with another one.
