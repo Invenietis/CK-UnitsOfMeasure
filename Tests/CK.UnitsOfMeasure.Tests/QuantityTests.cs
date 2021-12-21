@@ -306,6 +306,23 @@ namespace CK.UnitsOfMeasure.Tests
             
             var qg = q.ConvertTo( MeasureUnit.Gram * MeasureUnit.Gram );
             qg.Value.Should().Be( 35.0 * 1000 );
+
+            // The Equals relies on the Normalization.
+            qkg.Equals( qg ).Should().BeTrue();
+        }
+
+        [Test]
+        public void yet_another_quantity_equality()
+        {
+            var twoMetres = 2.WithUnit( MeasureUnit.Metre );
+            var oneMetre = 1.WithUnit( MeasureUnit.Metre );
+            var hundredCentimeters = 100.WithUnit( MeasureStandardPrefix.Centi[MeasureUnit.Metre] );
+
+            var r1 = twoMetres / oneMetre;
+            var r2 = twoMetres / hundredCentimeters;
+
+            r1.Equals( r2 ).Should().BeTrue();
+            r1.CompareTo( r2 ).Should().Be( 0 );
         }
     }
 }

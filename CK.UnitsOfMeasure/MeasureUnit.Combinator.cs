@@ -71,12 +71,34 @@ namespace CK.UnitsOfMeasure
                                 ? _normM[0]
                                 : ctx.RegisterExponent( exp, _normM[0] ));
                 }
+                int sumExp = 0;
                 var result = new List<ExponentMeasureUnit>( count );
                 for( int i = 0; i < count; ++i )
                 {
                     int exp = _normE[i];
+                    sumExp += exp;
                     if( exp != 0 ) result.Add( exp == 1 ? _normM[i] : ctx.RegisterExponent( exp, _normM[i] ) );
                 }
+                //if( sumExp == 0 && result.Count > 1 )
+                //{
+                //    // The sum of the exponent is 0 and there is at least 2 units.
+                //    // If all the units are bound to the same dimension, the resulting unit is None.
+                //    FullFactor adjustment = FullFactor.Neutral;
+                //    MeasureUnit singleNormalization = result[0].AtomicMeasureUnit.Normalization;
+                //    for( int i = 1; i < result.Count; ++i )
+                //    {
+                //        if( result[i].AtomicMeasureUnit.Normalization != singleNormalization )
+                //        {
+                //            singleNormalization = null;
+                //            break;
+                //        }
+                //        adjustment = adjustment.Multiply( result[i].NormalizationFactor );
+                //    }
+                //    if( singleNormalization != null )
+                //    {
+                //        adjustment = adjustment.Multiply( _dimensionLessFactor );
+                //    }
+                //}
                 if( !_dimensionLessFactor.IsNeutral )
                 {
                     result.Add( ctx.RegisterPrefixed( _dimensionLessFactor, MeasureStandardPrefix.None, None ) );

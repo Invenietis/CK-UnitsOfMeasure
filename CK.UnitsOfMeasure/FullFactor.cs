@@ -121,13 +121,27 @@ namespace CK.UnitsOfMeasure
             return Factor.ToString( formatProvider ) + ExpFactor.ToString( '*' );
         }
 
+        /// <summary>
+        /// Calls <see cref="TryParse(string, IFormatProvider, out FullFactor)"/> and throws a <see cref="FormatException"/> if parsing fails.
+        /// </summary>
+        /// <param name="s">The string to parse.</param>
+        /// <returns>The full factor.</returns>
         public static FullFactor Parse( string s, IFormatProvider formatProvider )
         {
             if( !TryParse( s, formatProvider, out FullFactor result ) )
-                throw new ArgumentException( $"Unable to parse FullFactor: '{s}'", nameof( s ) );
+                throw new FormatException( $"Unable to parse FullFactor: '{s}'" );
             return result;
         }
 
+        /// <summary>
+        /// Tries to parse a <see cref="FullFactor"/>. It is either an empty string (<see cref="Neutral"/>),
+        /// "0" (<see cref="Zero"/>, a ExpFactor (see <see cref="ExpFactor.TryParse(string, out ExpFactor)"/>) or
+        /// a double (using the <paramref name="formatProvider"/>) optionally multiplied '*' by a ExpFactor.
+        /// </summary>
+        /// <param name="s">The string to parse.</param>
+        /// <param name="formatProvider">Applies to the optional leading double <see cref="Factor"/>.</param>
+        /// <param name="factor">The resulting full factor.</param>
+        /// <returns>True on success, false otherwise.</returns>
         public static bool TryParse( string s, IFormatProvider formatProvider, out FullFactor factor )
         {
             factor = Zero;

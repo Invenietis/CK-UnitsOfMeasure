@@ -89,30 +89,57 @@ namespace CK.UnitsOfMeasure
             return s;
         }
 
+        /// <summary>
+        /// Calls <see cref="TryParse(string, out ExpFactor)"/> and throws a <see cref="FormatException"/> if parsing fails.
+        /// </summary>
+        /// <param name="s">The string to parse.</param>
+        /// <returns>The factor.</returns>
         public static ExpFactor Parse( string s )
         {
             if( !TryParse( s, out ExpFactor result ) )
-                throw new ArgumentException( $"Unable to parse ExpFactor: '{s}'", nameof( s ) );
+                throw new FormatException( $"Unable to parse ExpFactor: '{s}'." );
             return result;
         }
 
+        /// <summary>
+        /// Attempts to parse a <see cref="ExpFactor"/>. This is either the empty string (<see cref="Neutral"/>) or
+        /// "2^i", "10^i", "10^i.2^i" or "2^i.10^i" where 'i' is an invariant short integer that may be prefixed by '+' or '-'.
+        /// </summary>
+        /// <param name="s">The string to parse.</param>
+        /// <param name="factor">The resulting factor.</param>
+        /// <returns>True on success, false otherwise.</returns>
         public static bool TryParse( string s, out ExpFactor factor )
         {
             factor = Neutral;
             if( s.Length == 0 ) return true;
             if( s.StartsWith( "10^", StringComparison.Ordinal ) )
             {
-                if( !Int16.TryParse( s.Substring( 3 ), NumberStyles.Integer, CultureInfo.InvariantCulture, out short exp ) ) return false;
-                factor = new ExpFactor( 0, exp );
-                return true;
+                return Try( true, s, ref factor );
             }
             if( s.StartsWith( "2^", StringComparison.Ordinal ) )
             {
-                if( !Int16.TryParse( s.Substring( 2 ), NumberStyles.Integer, CultureInfo.InvariantCulture, out short exp ) ) return false;
-                factor = new ExpFactor( exp, 0 );
-                return true;
+                return Try( false, s, ref factor );
             }
             return false;
+
+            static bool Try( bool tenFirst, string s, ref ExpFactor factor )
+            {
+                s = s.Substring( tenFirst ? 3 : 2 );
+                int idxDot = s.IndexOf( '.' );
+                if( idxDot > 0 )
+                {
+                    if( !Int16.TryParse( s.Substring( 0, idxDot ), NumberStyles.Integer, CultureInfo.InvariantCulture, out short exp1 ) ) return false;
+                    s = s.Substring( idxDot + 1 );
+                    if( !s.StartsWith( tenFirst ? "2^" : "10^", StringComparison.Ordinal ) ) return false;
+                    s = s.Substring( tenFirst ? 2 : 3 );
+                    if( !Int16.TryParse( s, NumberStyles.Integer, CultureInfo.InvariantCulture, out short exp2 ) ) return false;
+                    factor = tenFirst ? new ExpFactor( exp2, exp1 ) : new ExpFactor( exp1, exp2 );
+                    return true;
+                }
+                if( !Int16.TryParse( s, NumberStyles.Integer, CultureInfo.InvariantCulture, out short exp ) ) return false;
+                factor = tenFirst ? new ExpFactor( 0, exp ) : new ExpFactor( exp, 0 );
+                return true;
+            }
         }
 
         /// <summary>

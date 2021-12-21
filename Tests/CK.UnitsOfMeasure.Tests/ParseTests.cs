@@ -2,6 +2,7 @@ using FluentAssertions;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -86,5 +87,65 @@ namespace CK.UnitsOfMeasure.Tests
             u.ToString().Should().Be( rewrite );
         }
 
+        [TestCase( true, "", 0, 0 )]
+        [TestCase( true, "2^0", 0, 0 )]
+        [TestCase( true, "10^0", 0, 0 )]
+        [TestCase( true, "10^3", 0, 3 )]
+        [TestCase( true, "2^+3", 3, 0 )]
+        [TestCase( true, "2^-3", -3, 0 )]
+        [TestCase( true, "10^+3", 0, 3 )]
+        [TestCase( true, "10^-3", 0, -3 )]
+        [TestCase( true, "2^1.10^2", 1, 2 )]
+        [TestCase( true, "2^-1.10^0", -1, 0 )]
+
+        [TestCase( false, "2^4.1", 0, 0 )]
+        [TestCase( false, "2^4.10^", 0, 0 )]
+        [TestCase( false, "2^", 0, 0 )]
+        [TestCase( false, "3", 0, 0 )]
+        [TestCase( false, "10^5*", 0, 0 )]
+        public void parsing_ExpFactor( bool success, string s, int exp2, int exp10 )
+        {
+            if( success )
+            {
+                var expected = new ExpFactor( exp2, exp10 );
+                ExpFactor.TryParse( s, out var p ).Should().BeTrue();
+                p.Should().Be( expected );
+                ExpFactor.Parse( s ).Should().Be( expected );
+            }
+            else
+            {
+                ExpFactor.TryParse( s, out _ ).Should().BeFalse();
+                FluentActions.Invoking( () => ExpFactor.Parse( s ) ).Should().Throw<FormatException>();
+            }
+        }
+
+        [TestCase( true, "", 1.0, 0, 0 )]
+        [TestCase( true, "3", 3.0, 0, 0 )]
+        [TestCase( true, "-3.7e8", -3.7e8, 0, 0 )]
+        [TestCase( true, "2^0", 1.0, 0, 0 )]
+        [TestCase( true, "5*10^0", 5.0, 0, 0 )]
+        [TestCase( true, "12.87e-7*10^3", 12.87e-7, 0, 3 )]
+        [TestCase( true, "15*2^+3", 15.0, 3, 0 )]
+        [TestCase( true, "7e7*2^-3", 7e7, -3, 0 )]
+
+        [TestCase( false, "2^4.1", 0, 0, 0 )]
+        [TestCase( false, "78.2^4.10^", 0, 0, 0 )]
+        [TestCase( false, "1.0*2^", 0, 0, 0 )]
+        [TestCase( false, "10^5*", 0, 0, 0 )]
+        public void parsing_FullFactor( bool success, string s, double f, int exp2, int exp10 )
+        {
+            if( success )
+            {
+                var expected = new FullFactor( f, new ExpFactor( exp2, exp10 ) );
+                FullFactor.TryParse( s, CultureInfo.InvariantCulture, out var p ).Should().BeTrue();
+                p.Should().Be( expected );
+                FullFactor.Parse( s, CultureInfo.InvariantCulture ).Should().Be( expected );
+            }
+            else
+            {
+                FullFactor.TryParse( s, CultureInfo.InvariantCulture, out _ ).Should().BeFalse();
+                FluentActions.Invoking( () => FullFactor.Parse( s, CultureInfo.InvariantCulture ) ).Should().Throw<FormatException>();
+            }
+        }
     }
 }
