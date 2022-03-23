@@ -9,14 +9,14 @@
     <PackageReference Include="CK.Core" Version="15.0.0-r04-01" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="NuGet.Credentials" Version="6.0.0" />
+    <PackageReference Include="NuGet.Credentials" Version="6.1.0" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="TestResult.xml" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="NUnit.ConsoleRunner" Version="3.14.0" />
+    <PackageReference Include="NUnit.ConsoleRunner" Version="3.15.0" />
     <PackageReference Include="NUnit.Runners.Net4" Version="2.6.4" />
-    <PackageReference Include="SimpleGitVersion.Cake" Version="7.0.0" />
+    <PackageReference Include="SimpleGitVersion.Cake" Version="7.1.0" />
   </ItemGroup>
 </Project>
