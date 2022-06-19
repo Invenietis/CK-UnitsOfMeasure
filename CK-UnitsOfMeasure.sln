@@ -1,9 +1,11 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26730.8
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{A87208F3-D73C-4AD4-9FF5-0314968EDD74}"
+	ProjectSection(SolutionItems) = preProject
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E3559EF9-ED4A-4169-9287-6F94CFBD09FA}"
 	ProjectSection(SolutionItems) = preProject
@@ -11,8 +13,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		appveyor.yml = appveyor.yml
 		NuGet.config = NuGet.config
 		RepositoryInfo.xml = RepositoryInfo.xml
-		Common\Shared.props = Common\Shared.props
 		Common\SharedKey.snk = Common\SharedKey.snk
+		Directory.Build.props = Directory.Build.props
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeCakeBuilder", "CodeCakeBuilder\CodeCakeBuilder.csproj", "{C495D3DF-2E63-466B-9886-DE8A3EFBD584}"

@@ -2,14 +2,17 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <OutputType>Exe</OutputType>
-    <IsPackable>False</IsPackable>
+    <IsPackable>false</IsPackable>
+    <SignAssembly>false</SignAssembly>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
     <Nullable>annotations</Nullable>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="CK.Core" Version="15.0.0-r06" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="NuGet.Credentials" Version="6.1.0" />
+    <PackageReference Include="NuGet.Credentials" Version="6.2.1" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="TestResult.xml" />
